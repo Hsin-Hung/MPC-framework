@@ -1,4 +1,4 @@
-# SysX - SIGMOD 2021 submission
+# SysX
 
 SysX is a relational Multi-Party Computation framework based on replicated secret sharing.
 
