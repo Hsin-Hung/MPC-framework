@@ -59,3 +59,8 @@ To build and run SysX on linux, edit the provided `Makefile` as follows:
 - Specify the dependency in the end of the target, for example:
 
     `exp-equality:   exp_equality.c $(PRIMITIVES) $(MPI) $(CFLAGS) -o exp-equality exp_equality.c $(PRIMITIVES) $(DEP)`
+
+
+## Demo 1
+
+https://youtu.be/xbzTmvEKXLE
