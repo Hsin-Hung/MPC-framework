@@ -1,5 +1,5 @@
 #include "primitives.h"
-#include "mpi.h"
+// #include "mpi.h"
 #include "utils.h"
 
 #define PRIVATE static
@@ -265,7 +265,7 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
   BShare *res2 = malloc(len*sizeof(BShare)); // remote shares
   int numbits = sizeof(BShare) * 8;
   int numlevels = log2(numbits);
-  MPI_Request r1, r2;
+  // MPI_Request r1, r2;
   int exchanges = 10;
   long batch_size = len/exchanges;
 
@@ -275,32 +275,32 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
     res2[i] = x2[i] ^ y2[i] ^ (~(BShare)0); // remote share
   }
 
-  // The result is stored in the (numbits/2) rightmost bits of res, res2 elements
-  for (int l=0; l<numlevels-1; l++) {
+  // // The result is stored in the (numbits/2) rightmost bits of res, res2 elements
+  // for (int l=0; l<numlevels-1; l++) {
 
-    // exchange 10 times per level
-    for (long i=0; i<len; i++) {
+  //   // exchange 10 times per level
+  //   for (long i=0; i<len; i++) {
 
-      res[i] = eq_b_level2(numbits >> l, res[i], res2[i]);
+  //     res[i] = eq_b_level2(numbits >> l, res[i], res2[i]);
 
-      // first 9 exchanges
-      if ( ((i+1)%batch_size)==0 ) {
-        MPI_Irecv(&res2[i-(batch_size-1)], batch_size, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
-        MPI_Isend(&res[i-(batch_size-1)], batch_size, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-      }
+  //     // first 9 exchanges
+  //     if ( ((i+1)%batch_size)==0 ) {
+  //       MPI_Irecv(&res2[i-(batch_size-1)], batch_size, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  //       MPI_Isend(&res[i-(batch_size-1)], batch_size, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //     }
 
-      // last exchange
-      if (i == len-1) {
-        MPI_Wait(&r1, MPI_STATUS_IGNORE);
-        MPI_Wait(&r2, MPI_STATUS_IGNORE);
-        MPI_Irecv(&res2[len - batch_size], batch_size, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
-        MPI_Isend(&res[len - batch_size], batch_size, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-      }
-    }
-    // wait for last exchange before moving on the next level
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
-    MPI_Wait(&r2, MPI_STATUS_IGNORE);
-  }
+  //     // last exchange
+  //     if (i == len-1) {
+  //       MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //       MPI_Wait(&r2, MPI_STATUS_IGNORE);
+  //       MPI_Irecv(&res2[len - batch_size], batch_size, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  //       MPI_Isend(&res[len - batch_size], batch_size, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //     }
+  //   }
+  //   // wait for last exchange before moving on the next level
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   MPI_Wait(&r2, MPI_STATUS_IGNORE);
+  // }
 
   // Last level (no exchange)
   for (long i=0; i<len; i++) {
@@ -321,8 +321,8 @@ void eq_b_array_inter_batch(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long
   BShare *res2 = malloc(len*sizeof(BShare)); // remote shares
   int numbits = sizeof(BShare) * 8;
   int numlevels = log2(numbits);
-  MPI_Request *r1 = malloc(len*sizeof(MPI_Request));
-  MPI_Request *r2 = malloc(len*sizeof(MPI_Request));
+  // MPI_Request *r1 = malloc(len*sizeof(MPI_Request));
+  // MPI_Request *r2 = malloc(len*sizeof(MPI_Request));
 
   // compute bitwise x^y^1
   for (long i=0; i<len; i++) {
@@ -330,23 +330,23 @@ void eq_b_array_inter_batch(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long
     res2[i] = x2[i] ^ y2[i] ^ (~(BShare)0); // remote share
   }
 
-  for (int l=0; l<numlevels; l++) {
+  // for (int l=0; l<numlevels; l++) {
 
-    // wait for results of previous level
-    if (l > 0) {
-      MPI_Waitall(len, r2, MPI_STATUSES_IGNORE);
-      MPI_Waitall(len, r1, MPI_STATUSES_IGNORE);
-    }
-    for (long i=0; i<len; i++) {
-      res[i] = eq_b_level2(numbits >> l, res[i], res2[i]);
-      // exchange result for element i, level l
-      // except for the final round
-      if (l != numlevels-1) {
-        MPI_Irecv(&res2[i], 1, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2[i]);
-        MPI_Isend(&res[i], 1, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1[i]);
-      }
-    }
-  }
+  //   // wait for results of previous level
+  //   if (l > 0) {
+  //     MPI_Waitall(len, r2, MPI_STATUSES_IGNORE);
+  //     MPI_Waitall(len, r1, MPI_STATUSES_IGNORE);
+  //   }
+  //   for (long i=0; i<len; i++) {
+  //     res[i] = eq_b_level2(numbits >> l, res[i], res2[i]);
+  //     // exchange result for element i, level l
+  //     // except for the final round
+  //     if (l != numlevels-1) {
+  //       MPI_Irecv(&res2[i], 1, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2[i]);
+  //       MPI_Isend(&res[i], 1, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1[i]);
+  //     }
+  //   }
+  // }
   // The local share of the final result is stored in res.
   // We need to call exchange again before using it in a subsequent operation.
   free(res2);
@@ -1268,7 +1268,7 @@ inline PRIVATE int get_next_index(int pos, int area, int comp_per_box) {
 // converts an arithmetic share to binary
 void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, int len) {
 
-  MPI_Request r1, r2;
+  // MPI_Request r1, r2;
   BShare *w1 = malloc(len*sizeof(BShare)); // local share of x3
   assert(w1!=NULL);
   BShare *w2 = malloc(len*sizeof(BShare)); // remote share of x3
@@ -1278,102 +1278,102 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   BShare *r_temp2 = malloc(len*sizeof(BShare)); // random share
   assert(r_temp2!=NULL);
 
-  if (get_rank() == 0) {
-    // generate bool shares of x1+x2 (xa1 + xa2)
-    BShare *z13 = malloc(len*sizeof(BShare));
-    assert(z13!=NULL);
-    BShare *z12 = malloc(len*sizeof(BShare));
-    assert(z12!=NULL);
-    for (int i=0; i<len; i++) {
-      xa2[i] += xa1[i]; // xa1 + xa2
-    }
-    for (int i=0; i<len; i++) {
-      generate_bool_share(xa2[i], &xa1[i], &z12[i], &z13[i]);
-      // local share of xa1+xa2 now in xa1
-    }
-    // distribute shares to P2, P3
-    MPI_Isend(z12, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    MPI_Isend(z13, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
-    MPI_Wait(&r2, MPI_STATUS_IGNORE);
-    free(z12); free(z13);
+  // if (get_rank() == 0) {
+  //   // generate bool shares of x1+x2 (xa1 + xa2)
+  //   BShare *z13 = malloc(len*sizeof(BShare));
+  //   assert(z13!=NULL);
+  //   BShare *z12 = malloc(len*sizeof(BShare));
+  //   assert(z12!=NULL);
+  //   for (int i=0; i<len; i++) {
+  //     xa2[i] += xa1[i]; // xa1 + xa2
+  //   }
+  //   for (int i=0; i<len; i++) {
+  //     generate_bool_share(xa2[i], &xa1[i], &z12[i], &z13[i]);
+  //     // local share of xa1+xa2 now in xa1
+  //   }
+  //   // distribute shares to P2, P3
+  //   MPI_Isend(z12, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   MPI_Isend(z13, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   MPI_Wait(&r2, MPI_STATUS_IGNORE);
+  //   free(z12); free(z13);
 
-    // receive share of x3 from P3
-    MPI_Irecv(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   // receive share of x3 from P3
+  //   MPI_Irecv(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
 
-    // generate pairs of random binary shares (R1)
-    get_next_rb_pair_array(xb2, xb1, len);
-    // receive share from P2 and compute xb1
-    MPI_Irecv(r_temp, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
-    // compute xb1
-    for (int i=0; i<len; i++) {
-      xb1[i] ^= r_temp[i];
-      xb1[i] ^= xb2[i]; // R1
-    }
-    // xb2 contains the local share of R1
-    // generate pairs of random binary shares (R2)
-    get_next_rb_pair_array(r_temp, r_temp2, len);
-    // r_temp contains the local share of R2
-  }
-  else if (get_rank() == 1) { //P2
-    // receive share of x1+x2 frm P1
-    MPI_Irecv(xa1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    // receive share of x3
-    MPI_Irecv(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
-    MPI_Wait(&r2, MPI_STATUS_IGNORE);
+  //   // generate pairs of random binary shares (R1)
+  //   get_next_rb_pair_array(xb2, xb1, len);
+  //   // receive share from P2 and compute xb1
+  //   MPI_Irecv(r_temp, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   // compute xb1
+  //   for (int i=0; i<len; i++) {
+  //     xb1[i] ^= r_temp[i];
+  //     xb1[i] ^= xb2[i]; // R1
+  //   }
+  //   // xb2 contains the local share of R1
+  //   // generate pairs of random binary shares (R2)
+  //   get_next_rb_pair_array(r_temp, r_temp2, len);
+  //   // r_temp contains the local share of R2
+  // }
+  // else if (get_rank() == 1) { //P2
+  //   // receive share of x1+x2 frm P1
+  //   MPI_Irecv(xa1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   // receive share of x3
+  //   MPI_Irecv(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   MPI_Wait(&r2, MPI_STATUS_IGNORE);
 
-    // generate pairs of random binary shares (R1)
-    get_next_rb_pair_array(xb2, xb1, len);
-    // send local to P1
-    MPI_Isend(xb2, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
-    // xb2 contains the local share of R1
-    // generate pairs of random binary shares (R2)
-    get_next_rb_pair_array(r_temp, xb1, len);
-    // receive share from P3 and compute xb1
-    MPI_Irecv(r_temp2, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
-    // compute xb1
-    for (int i=0; i<len; i++) {
-      xb1[i] ^= r_temp2[i];
-      xb1[i] ^= r_temp[i]; // R2
-    }
-    // r_temp contains the local share of R2
-  }
-  else { //P3
-    // generate bool shares of x3 (xa1)
-    BShare *w13 = malloc(len*sizeof(BShare));
-    assert(w13!=NULL);
+  //   // generate pairs of random binary shares (R1)
+  //   get_next_rb_pair_array(xb2, xb1, len);
+  //   // send local to P1
+  //   MPI_Isend(xb2, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   // xb2 contains the local share of R1
+  //   // generate pairs of random binary shares (R2)
+  //   get_next_rb_pair_array(r_temp, xb1, len);
+  //   // receive share from P3 and compute xb1
+  //   MPI_Irecv(r_temp2, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   // compute xb1
+  //   for (int i=0; i<len; i++) {
+  //     xb1[i] ^= r_temp2[i];
+  //     xb1[i] ^= r_temp[i]; // R2
+  //   }
+  //   // r_temp contains the local share of R2
+  // }
+  // else { //P3
+  //   // generate bool shares of x3 (xa1)
+  //   BShare *w13 = malloc(len*sizeof(BShare));
+  //   assert(w13!=NULL);
 
-    for (int i=0; i<len; i++) {
-      generate_bool_share(xa1[i], &w13[i], &w2[i], &w1[i]);
-    }
+  //   for (int i=0; i<len; i++) {
+  //     generate_bool_share(xa1[i], &w13[i], &w2[i], &w1[i]);
+  //   }
 
-    // receive share of x1+x2 frm P1
-    MPI_Irecv(xa1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   // receive share of x1+x2 frm P1
+  //   MPI_Irecv(xa1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
 
-    // distribute shares to P1, P2
-    MPI_Isend(w13, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    MPI_Isend(w2, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  //   // distribute shares to P1, P2
+  //   MPI_Isend(w13, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   MPI_Isend(w2, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
 
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
-    MPI_Wait(&r2, MPI_STATUS_IGNORE);
-    free(w13);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   MPI_Wait(&r2, MPI_STATUS_IGNORE);
+  //   free(w13);
 
-    // generate pairs of random binary shares (R1)
-    get_next_rb_pair_array(xb2, xb1, len);
-    // xb2 contains the local share of R1
-    // generate pairs of random binary shares (R2)
-    get_next_rb_pair_array(r_temp, xb1, len);
-    // send local to P2
-    MPI_Isend(r_temp, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-    MPI_Wait(&r1, MPI_STATUS_IGNORE);
-    // r_temp contains the local share of R2
-  }
+  //   // generate pairs of random binary shares (R1)
+  //   get_next_rb_pair_array(xb2, xb1, len);
+  //   // xb2 contains the local share of R1
+  //   // generate pairs of random binary shares (R2)
+  //   get_next_rb_pair_array(r_temp, xb1, len);
+  //   // send local to P2
+  //   MPI_Isend(r_temp, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //   // r_temp contains the local share of R2
+  // }
 
   /***** all parties *****/
   // get remote shares z2, w2
@@ -1390,23 +1390,23 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   free(r_temp); free(r_temp2);
 
   // reveal y to P3
-  if (get_rank() == 0) {
-      MPI_Isend(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-      MPI_Wait(&r1, MPI_STATUS_IGNORE);
-  } else if (get_rank() == 1) { // P2
-      MPI_Isend(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-      MPI_Wait(&r1, MPI_STATUS_IGNORE);
-  } else { // P3
-      MPI_Irecv(xb1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-      MPI_Irecv(xa1, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  // if (get_rank() == 0) {
+  //     MPI_Isend(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //     MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  // } else if (get_rank() == 1) { // P2
+  //     MPI_Isend(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //     MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  // } else { // P3
+  //     MPI_Irecv(xb1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  //     MPI_Irecv(xa1, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
 
-      MPI_Wait(&r1, MPI_STATUS_IGNORE);
-      MPI_Wait(&r2, MPI_STATUS_IGNORE);
-      for (int i=0; i<len; i++) {
-        xb1[i] ^= xa1[i];
-        xb1[i] ^= w1[i];
-      }
-    }
+  //     MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  //     MPI_Wait(&r2, MPI_STATUS_IGNORE);
+  //     for (int i=0; i<len; i++) {
+  //       xb1[i] ^= xa1[i];
+  //       xb1[i] ^= w1[i];
+  //     }
+  //   }
   /***** all parties *****/
   // exchange xb1, xb2
   exchange_shares_array(xb1, xb2, len);

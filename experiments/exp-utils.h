@@ -1,4 +1,4 @@
-#include "mpi.h"
+// #include "mpi.h"
 #include "../src/primitives.h"
 #include "../src/relational.h"
 #include "../src/comm.h"

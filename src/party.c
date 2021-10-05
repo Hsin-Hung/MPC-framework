@@ -1,7 +1,7 @@
 #include "party.h"
 
 #include <sodium.h>
-#include "mpi.h"
+// #include "mpi.h"
 #include "mpctypes.h"
 
 #define PRIVATE static
@@ -24,11 +24,11 @@ int exchange_rsz_seeds(int succ_rank, int pred_rank) {
   // generate local seed
   randombytes_buf(&seed_local, sizeof(seed_local));
 
-  // send seed to successor
-  MPI_Send(&seed_local, 1, MPI_LONG_LONG, succ_rank, MSG_TAG, MPI_COMM_WORLD);
+  // // send seed to successor
+  // MPI_Send(&seed_local, 1, MPI_LONG_LONG, succ_rank, MSG_TAG, MPI_COMM_WORLD);
 
-  // receive remote seed
-  MPI_Recv(&seed_remote, 1, MPI_LONG_LONG, pred_rank, MSG_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // // receive remote seed
+  // MPI_Recv(&seed_remote, 1, MPI_LONG_LONG, pred_rank, MSG_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
   // init generator states
   initstate(seed_local, local_state, RAND_STATE_SIZE);

@@ -24,42 +24,42 @@ int main(int argc, char** argv) {
   BShare r1s1[ROWS1][COLS1], r1s2[ROWS1][COLS1], r1s3[ROWS1][COLS1];
   BShare rs[ROWS1];
 
-  if (rank == 0) { //P1
+  // if (rank == 0) { //P1
 
-    // Initialize input data and shares
-    Data r1[ROWS1][COLS1] = {{1, 10, 1, 1}, {1, 10, 3, 3}, {1, 10, 6, 6},
-                             {4, 11, 2, 12}, {4, 12, 7, 7},
-                             {6, 12, 11, 11}, {6, 12, 4, 4}, {6, 12, 2, 2}};
-    init_sharing();
+  //   // Initialize input data and shares
+  //   Data r1[ROWS1][COLS1] = {{1, 10, 1, 1}, {1, 10, 3, 3}, {1, 10, 6, 6},
+  //                            {4, 11, 2, 12}, {4, 12, 7, 7},
+  //                            {6, 12, 11, 11}, {6, 12, 4, 4}, {6, 12, 2, 2}};
+  //   init_sharing();
 
-    // generate r1 shares
-    for (int i=0; i<ROWS1; i++) {
-      for (int j=0; j<COLS1; j++) {
-        generate_bool_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
-      }
-    }
+  //   // generate r1 shares
+  //   for (int i=0; i<ROWS1; i++) {
+  //     for (int j=0; j<COLS1; j++) {
+  //       generate_bool_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
+  //     }
+  //   }
 
-    BShare rs2[ROWS1], rs3[ROWS1];
-    for (int i=0; i<ROWS1; i++) {
-      generate_bool_share(r[i], &rs[i], &rs2[i], &rs3[i]);
-    }
+  //   BShare rs2[ROWS1], rs3[ROWS1];
+  //   for (int i=0; i<ROWS1; i++) {
+  //     generate_bool_share(r[i], &rs[i], &rs2[i], &rs3[i]);
+  //   }
 
-    //Send shares to P2
-    MPI_Send(&r1s2[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    //Send shares to P3
-    MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&r1s1[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    // Send selected bitshares to P2
-    MPI_Send(&rs2, ROWS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    // Send selected bit shares to P3
-    MPI_Send(&rs3, ROWS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  }
-  else { //P2 or P3
-    MPI_Recv(&r1s1[0][0], ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&r1s2[0][0], ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&rs, ROWS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
+  //   //Send shares to P2
+  //   MPI_Send(&r1s2[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P3
+  //   MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&r1s1[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   // Send selected bitshares to P2
+  //   MPI_Send(&rs2, ROWS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   // Send selected bit shares to P3
+  //   MPI_Send(&rs3, ROWS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  // }
+  // else { //P2 or P3
+  //   MPI_Recv(&r1s1[0][0], ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&r1s2[0][0], ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&rs, ROWS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -139,6 +139,6 @@ int main(int argc, char** argv) {
   }
 
   // tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }

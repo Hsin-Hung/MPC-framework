@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "mpi.h"
+// #include "mpi.h"
 #include "../src/utils.h"
 #include "../src/relational.h"
 
@@ -113,6 +113,6 @@ int main(int argc, char** argv) {
   free(res_distinct); free(res_distinct_remote); free(t1.contents);
 
   // Tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }

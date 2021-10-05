@@ -25,41 +25,41 @@ int main(int argc, char** argv) {
   AShare ra[ROWS];
 
   // P1 generates Data BShares and random bit shares
-  if (rank == 0) {
+  // if (rank == 0) {
 
-    BShare rs2[ROWS], rs3[ROWS], rb2[ROWS], rb3[ROWS];
-    AShare ra2[ROWS], ra3[ROWS];
+  //   BShare rs2[ROWS], rs3[ROWS], rb2[ROWS], rb3[ROWS];
+  //   AShare ra2[ROWS], ra3[ROWS];
 
-    for (int i=0; i<ROWS; i++) {
-      generate_bool_share(r[i], &rs[i], &rs2[i], &rs3[i]);
-    }
+  //   for (int i=0; i<ROWS; i++) {
+  //     generate_bool_share(r[i], &rs[i], &rs2[i], &rs3[i]);
+  //   }
 
-    //Send shares to P2
-    MPI_Send(&rs2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    //Send shares to P3
-    MPI_Send(&rs3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P2
+  //   MPI_Send(&rs2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P3
+  //   MPI_Send(&rs3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
 
-    // Generate random bits and corresponding shares
-    generate_rand_bit_shares(rb, ra, rb2, ra2, rb3, ra3, ROWS);
+  //   // Generate random bits and corresponding shares
+  //   generate_rand_bit_shares(rb, ra, rb2, ra2, rb3, ra3, ROWS);
 
-    // Send random bit shares
-    //Send shares to P2
-    MPI_Send(&rb2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ra2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    //Send shares to P3
-    MPI_Send(&rb3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ra3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  }
-  else if (rank == 1) { //P2
-    MPI_Recv(&rs, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&rb, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ra, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
-  else { //P3
-    MPI_Recv(&rs, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&rb, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ra, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
+  //   // Send random bit shares
+  //   //Send shares to P2
+  //   MPI_Send(&rb2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ra2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P3
+  //   MPI_Send(&rb3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ra3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  // }
+  // else if (rank == 1) { //P2
+  //   MPI_Recv(&rs, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&rb, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ra, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
+  // else { //P3
+  //   MPI_Recv(&rs, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&rb, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ra, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
 
   for (int i=0; i<ROWS; i++) {
     converted[i] = convert_single_bit(rs[i], ra[i], rb[i]);
@@ -86,6 +86,6 @@ int main(int argc, char** argv) {
   }
 
   // tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }
