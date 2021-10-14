@@ -17,40 +17,40 @@ int main(int argc, char** argv) {
 
   BShare xs1[10], xs2[10], xs3[10], ys1[10], ys2[10], ys3[10];
 
-  if (rank == 0) { //P1
-    // Initialize input data and shares
-    Data x[10] = {111, -4, -17, 2345, 999, 0, -28922, 1231241, 0, 23437};
-    // Res: 0, 0, 0, 0, 1, 0, 1, 0, 0, 1
-    Data y[10] = {0, -4, -5, 123556, 999, 70, -243242, 12421421413421, 0, 78};
+  // if (rank == 0) { //P1
+  //   // Initialize input data and shares
+  //   Data x[10] = {111, -4, -17, 2345, 999, 0, -28922, 1231241, 0, 23437};
+  //   // Res: 0, 0, 0, 0, 1, 0, 1, 0, 0, 1
+  //   Data y[10] = {0, -4, -5, 123556, 999, 70, -243242, 12421421413421, 0, 78};
 
-    init_sharing();
-    for (int i=0; i<10; i++) {
-        generate_bool_share(x[i], &xs1[i], &xs2[i], &xs3[i]);
-        generate_bool_share(y[i], &ys1[i], &ys2[i], &ys3[i]);
-    }
-    //Send shares to P2
-    MPI_Send(&xs2, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ys2, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&xs3, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ys3, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    //Send shares to P3
-    MPI_Send(&xs3, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ys3, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&xs1, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ys1, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  }
-  else if (rank == 1) { //P2
-    MPI_Recv(&xs1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ys1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&xs2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ys2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
-  else { //P3
-    MPI_Recv(&xs1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ys1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&xs2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ys2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
+  //   init_sharing();
+  //   for (int i=0; i<10; i++) {
+  //       generate_bool_share(x[i], &xs1[i], &xs2[i], &xs3[i]);
+  //       generate_bool_share(y[i], &ys1[i], &ys2[i], &ys3[i]);
+  //   }
+  //   //Send shares to P2
+  //   MPI_Send(&xs2, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ys2, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&xs3, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ys3, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P3
+  //   MPI_Send(&xs3, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ys3, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&xs1, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ys1, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  // }
+  // else if (rank == 1) { //P2
+  //   MPI_Recv(&xs1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ys1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&xs2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ys2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
+  // else { //P3
+  //   MPI_Recv(&xs1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ys1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&xs2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ys2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -122,6 +122,6 @@ int main(int argc, char** argv) {
   }
 
   // tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }

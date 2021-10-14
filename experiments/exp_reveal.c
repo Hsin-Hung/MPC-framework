@@ -76,6 +76,6 @@ int main(int argc, char** argv) {
   free(r1s1); free(r1s2);
 
   // tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }

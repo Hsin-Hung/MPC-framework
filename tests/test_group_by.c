@@ -36,69 +36,69 @@ int main(int argc, char** argv) {
   Data z[10][2] = {{1, 42}, {1, 42}, {2, 42}, {3, 42}, {15, 42}, {15, 43},
                   {15, 44}, {17, 1}, {18, 1}, {18, 1}};
 
-  if (rank == 0) { //P1
+  // if (rank == 0) { //P1
 
-    init_sharing();
+  //   init_sharing();
 
-    // generate z shares
-    for (int i=0; i<10; i++) {
-        for (int j=0; j<2; j++) {
-            generate_bool_share(z[i][j], &zs1[i][j], &zs2[i][j], &zs3[i][j]);
-        }
-    }
+  //   // generate z shares
+  //   for (int i=0; i<10; i++) {
+  //       for (int j=0; j<2; j++) {
+  //           generate_bool_share(z[i][j], &zs1[i][j], &zs2[i][j], &zs3[i][j]);
+  //       }
+  //   }
 
-    BShare rand_b2[36], rand_b3[36];
-    AShare rand_a2[36], rand_a3[36];
+  //   BShare rand_b2[36], rand_b3[36];
+  //   AShare rand_a2[36], rand_a3[36];
 
-    BShare rs2[10], rs3[10], rb2[10], rb3[10];
-    AShare ra2[10], ra3[10];
+  //   BShare rs2[10], rs3[10], rb2[10], rb3[10];
+  //   AShare ra2[10], ra3[10];
 
-    for (int i=0; i<10; i++) {
-      generate_bool_share(r[i], &rs[i], &rs2[i], &rs3[i]);
-    }
+  //   for (int i=0; i<10; i++) {
+  //     generate_bool_share(r[i], &rs[i], &rs2[i], &rs3[i]);
+  //   }
 
-    //Send shares to P2
-    MPI_Send(&zs2[0][0], 10*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&zs3[0][0], 10*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P2
+  //   MPI_Send(&zs2[0][0], 10*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&zs3[0][0], 10*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
 
-    MPI_Send(&rs2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&rs2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
 
-    //Send shares to P3
-    MPI_Send(&zs3[0][0], 10*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&zs1[0][0], 10*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P3
+  //   MPI_Send(&zs3[0][0], 10*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&zs1[0][0], 10*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
 
-    MPI_Send(&rs3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&rs3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
 
-    // Generate random bits and corresponding shares
-    generate_rand_bit_shares(rb, ra, rb2, ra2, rb3, ra3, ROWS);
+  //   // Generate random bits and corresponding shares
+  //   generate_rand_bit_shares(rb, ra, rb2, ra2, rb3, ra3, ROWS);
 
-    generate_rand_bit_shares(rand_b, rand_a, rand_b2,
-                             rand_a2, rand_b3, rand_a3, 36);
+  //   generate_rand_bit_shares(rand_b, rand_a, rand_b2,
+  //                            rand_a2, rand_b3, rand_a3, 36);
 
-    // Send random bit shares
-    // Send shares to P2
-    MPI_Send(&rb2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ra2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&rand_b2, 36, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&rand_a2, 36, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   // Send random bit shares
+  //   // Send shares to P2
+  //   MPI_Send(&rb2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ra2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&rand_b2, 36, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&rand_a2, 36, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
 
-    // Send shares to P3
-    MPI_Send(&rb3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ra3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&rand_b3, 36, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&rand_a3, 36, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  }
-  else { //P2 and P3
-    MPI_Recv(&zs1[0][0], 10*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&zs2[0][0], 10*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   // Send shares to P3
+  //   MPI_Send(&rb3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ra3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&rand_b3, 36, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&rand_a3, 36, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  // }
+  // else { //P2 and P3
+  //   MPI_Recv(&zs1[0][0], 10*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&zs2[0][0], 10*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    MPI_Recv(&rs, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&rb, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ra, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&rs, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&rb, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ra, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    MPI_Recv(&rand_b, 36, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&rand_a, 36, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
+  //   MPI_Recv(&rand_b, 36, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&rand_a, 36, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -387,6 +387,6 @@ int main(int argc, char** argv) {
   }
 
   // tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }

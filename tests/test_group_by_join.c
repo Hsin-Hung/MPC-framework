@@ -29,89 +29,89 @@ int main(int argc, char** argv) {
   BShare r1s1[ROWS1][COLS1], r1s2[ROWS1][COLS1], r1s3[ROWS1][COLS1],
          r2s1[ROWS2][COLS2], r2s2[ROWS2][COLS2], r2s3[ROWS2][COLS2];
 
-  if (rank == 0) { //P1
+  // if (rank == 0) { //P1
 
-    // Initialize input data and shares
-    Data r1[ROWS1][COLS1] = {{1, 10, 0, 1}, {2, 10, 0, 1}, {4, 10, 0, 1},
-                             {3, 11, 0, 1}, {5, 12, 0, 1},
-                             {6, 12, 0, 1}, {2, 12, 0, 1}};
-    Data r2[ROWS2][COLS2] = {{1, 10}, {2, 20}, {3, 10}, {4, -5}, {5, 5},
-                              {6, 0}};
+  //   // Initialize input data and shares
+  //   Data r1[ROWS1][COLS1] = {{1, 10, 0, 1}, {2, 10, 0, 1}, {4, 10, 0, 1},
+  //                            {3, 11, 0, 1}, {5, 12, 0, 1},
+  //                            {6, 12, 0, 1}, {2, 12, 0, 1}};
+  //   Data r2[ROWS2][COLS2] = {{1, 10}, {2, 20}, {3, 10}, {4, -5}, {5, 5},
+  //                             {6, 0}};
 
-    init_sharing();
+  //   init_sharing();
 
-    // generate r1 shares
-    for (int i=0; i<ROWS1; i++) {
-      for (int j=0; j<COLS1-2; j++) {
-        generate_bool_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
-      }
-    }
-    // Last two columns (avg_score, count) are arithmetic shares
-    for (int i=0; i<ROWS1; i++) {
-      for (int j=2; j<COLS1; j++) {
-        generate_int_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
-      }
-    }
+  //   // generate r1 shares
+  //   for (int i=0; i<ROWS1; i++) {
+  //     for (int j=0; j<COLS1-2; j++) {
+  //       generate_bool_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
+  //     }
+  //   }
+  //   // Last two columns (avg_score, count) are arithmetic shares
+  //   for (int i=0; i<ROWS1; i++) {
+  //     for (int j=2; j<COLS1; j++) {
+  //       generate_int_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
+  //     }
+  //   }
 
-    // generate r2 shares
-    for (int i=0; i<ROWS2; i++) {
-      for (int j=0; j<COLS2-1; j++) {
-        generate_bool_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
-      }
-    }
+  //   // generate r2 shares
+  //   for (int i=0; i<ROWS2; i++) {
+  //     for (int j=0; j<COLS2-1; j++) {
+  //       generate_bool_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
+  //     }
+  //   }
 
-    // the score attribute is an arithmetic share AShare
-    for (int i=0; i<ROWS2; i++) {
-      for (int j=1; j<COLS2; j++) {
-        generate_int_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
-      }
-    }
+  //   // the score attribute is an arithmetic share AShare
+  //   for (int i=0; i<ROWS2; i++) {
+  //     for (int j=1; j<COLS2; j++) {
+  //       generate_int_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
+  //     }
+  //   }
 
-    //Send shares to P2
-    MPI_Send(&r1s2[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&r2s2[0][0], ROWS2*COLS2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&r2s3[0][0], ROWS2*COLS2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    //Send shares to P3
-    MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&r2s3[0][0], ROWS2*COLS2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&r1s1[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&r2s1[0][0], ROWS2*COLS2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P2
+  //   MPI_Send(&r1s2[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&r2s2[0][0], ROWS2*COLS2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&r2s3[0][0], ROWS2*COLS2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P3
+  //   MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&r2s3[0][0], ROWS2*COLS2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&r1s1[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&r2s1[0][0], ROWS2*COLS2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
 
 
-    BShare rb2_left[ROWS1], rb3_left[ROWS1], rb2_right[ROWS2*batch_size], rb3_right[ROWS2*batch_size];
-    AShare ra2_left[ROWS1], ra3_left[ROWS1], ra2_right[ROWS2*batch_size], ra3_right[ROWS2*batch_size];
+  //   BShare rb2_left[ROWS1], rb3_left[ROWS1], rb2_right[ROWS2*batch_size], rb3_right[ROWS2*batch_size];
+  //   AShare ra2_left[ROWS1], ra3_left[ROWS1], ra2_right[ROWS2*batch_size], ra3_right[ROWS2*batch_size];
 
-    // Generate random bits and corresponding shares
-    generate_rand_bit_shares(rb_left, ra_left, rb2_left, ra2_left, rb3_left, ra3_left, ROWS1);
-    generate_rand_bit_shares(rb_right, ra_right, rb2_right, ra2_right, rb3_right, ra3_right, ROWS2*batch_size);
+  //   // Generate random bits and corresponding shares
+  //   generate_rand_bit_shares(rb_left, ra_left, rb2_left, ra2_left, rb3_left, ra3_left, ROWS1);
+  //   generate_rand_bit_shares(rb_right, ra_right, rb2_right, ra2_right, rb3_right, ra3_right, ROWS2*batch_size);
 
-    // Send random bit shares
-    // Send shares to P2
-    MPI_Send(&rb2_left, ROWS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ra2_left, ROWS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&rb2_right, ROWS2*batch_size, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ra2_right, ROWS2*batch_size, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   // Send random bit shares
+  //   // Send shares to P2
+  //   MPI_Send(&rb2_left, ROWS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ra2_left, ROWS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&rb2_right, ROWS2*batch_size, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ra2_right, ROWS2*batch_size, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
 
-    // Send shares to P3
-    MPI_Send(&rb3_left, ROWS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ra3_left, ROWS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&rb3_right, ROWS2*batch_size, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&ra3_right, ROWS2*batch_size, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  }
-  else { //P2 or P3
+  //   // Send shares to P3
+  //   MPI_Send(&rb3_left, ROWS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ra3_left, ROWS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&rb3_right, ROWS2*batch_size, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&ra3_right, ROWS2*batch_size, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  // }
+  // else { //P2 or P3
 
-    MPI_Recv(&r1s1[0][0], ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&r2s1[0][0], ROWS2*COLS2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&r1s2[0][0], ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&r2s2[0][0], ROWS2*COLS2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&r1s1[0][0], ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&r2s1[0][0], ROWS2*COLS2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&r1s2[0][0], ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&r2s2[0][0], ROWS2*COLS2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    MPI_Recv(&rb_left, ROWS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ra_left, ROWS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&rb_right, ROWS2*batch_size, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&ra_right, ROWS2*batch_size, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&rb_left, ROWS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ra_left, ROWS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&rb_right, ROWS2*batch_size, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&ra_right, ROWS2*batch_size, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-  }
+  // }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -193,6 +193,6 @@ int main(int argc, char** argv) {
   }
 
   // tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }

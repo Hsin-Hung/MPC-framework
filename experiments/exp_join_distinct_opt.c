@@ -35,56 +35,56 @@ int main(int argc, char** argv) {
   BShareTable t2 = {-1, rank, ROWS2, 2*COLS, 2};
   allocate_bool_shares_table(&t2);
 
-  if (rank == 0) { //P1
-    // Initialize input data and shares
-    Table r1, r2;
-    generate_random_table(&r1, ROWS1, COLS);
-    generate_random_table(&r2, ROWS2, COLS);
+  // if (rank == 0) { //P1
+  //   // Initialize input data and shares
+  //   Table r1, r2;
+  //   generate_random_table(&r1, ROWS1, COLS);
+  //   generate_random_table(&r2, ROWS2, COLS);
 
-    // t1 Bshare tables for P2, P3 (local to P1)
-    BShareTable t12 = {-1, 1, ROWS1, 2*COLS, 1};
-    allocate_bool_shares_table(&t12);
-    BShareTable t13 = {-1, 2, ROWS1, 2*COLS, 1};
-    allocate_bool_shares_table(&t13);
+  //   // t1 Bshare tables for P2, P3 (local to P1)
+  //   BShareTable t12 = {-1, 1, ROWS1, 2*COLS, 1};
+  //   allocate_bool_shares_table(&t12);
+  //   BShareTable t13 = {-1, 2, ROWS1, 2*COLS, 1};
+  //   allocate_bool_shares_table(&t13);
 
-    // t2 Bshare tables for P2, P3 (local to P1)
-    BShareTable t22 = {-1, 1, ROWS2, 2*COLS, 2};
-    allocate_bool_shares_table(&t22);
-    BShareTable t23 = {-1, 2, ROWS2, 2*COLS, 2};
-    allocate_bool_shares_table(&t23);
+  //   // t2 Bshare tables for P2, P3 (local to P1)
+  //   BShareTable t22 = {-1, 1, ROWS2, 2*COLS, 2};
+  //   allocate_bool_shares_table(&t22);
+  //   BShareTable t23 = {-1, 2, ROWS2, 2*COLS, 2};
+  //   allocate_bool_shares_table(&t23);
     
-    init_sharing();
+  //   init_sharing();
 
-    // Generate boolean shares for r1
-    generate_bool_share_tables(&r1, &t1, &t12, &t13);
-    // Generate boolean shares for r2
-    generate_bool_share_tables(&r2, &t2, &t22, &t23);
+  //   // Generate boolean shares for r1
+  //   generate_bool_share_tables(&r1, &t1, &t12, &t13);
+  //   // Generate boolean shares for r2
+  //   generate_bool_share_tables(&r2, &t2, &t22, &t23);
 
-    //Send shares to P2
-    MPI_Send(&(t12.contents[0][0]), ROWS1*2*COLS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&(t22.contents[0][0]), ROWS2*2*COLS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P2
+  //   MPI_Send(&(t12.contents[0][0]), ROWS1*2*COLS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&(t22.contents[0][0]), ROWS2*2*COLS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
 
-    //Send shares to P3
-    MPI_Send(&(t13.contents[0][0]), ROWS1*2*COLS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&(t23.contents[0][0]), ROWS2*2*COLS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P3
+  //   MPI_Send(&(t13.contents[0][0]), ROWS1*2*COLS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&(t23.contents[0][0]), ROWS2*2*COLS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
 
-    // free temp tables
-    free(r1.contents);
-    free(t12.contents);
-    free(t13.contents);
-    free(r2.contents);
-    free(t22.contents);
-    free(t23.contents);
+  //   // free temp tables
+  //   free(r1.contents);
+  //   free(t12.contents);
+  //   free(t13.contents);
+  //   free(r2.contents);
+  //   free(t22.contents);
+  //   free(t23.contents);
 
-  }
-  else if (rank == 1) { //P2
-    MPI_Recv(&(t1.contents[0][0]), ROWS1*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&(t2.contents[0][0]), ROWS2*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
-  else { //P3
-    MPI_Recv(&(t1.contents[0][0]), ROWS1*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&(t2.contents[0][0]), ROWS2*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
+  // }
+  // else if (rank == 1) { //P2
+  //   MPI_Recv(&(t1.contents[0][0]), ROWS1*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&(t2.contents[0][0]), ROWS2*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
+  // else { //P3
+  //   MPI_Recv(&(t1.contents[0][0]), ROWS1*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&(t2.contents[0][0]), ROWS2*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -177,6 +177,6 @@ int main(int argc, char** argv) {
   free(res_distinct); free(res_distinct_remote); free(t1.contents);
 
   // tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }

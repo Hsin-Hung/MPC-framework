@@ -54,91 +54,91 @@ int main(int argc, char** argv) {
   BShare *rb_right = calloc(ROWS_O*BATCH_SIZE, sizeof(BShare));
   AShare *ra_right = calloc(ROWS_O*BATCH_SIZE, sizeof(AShare));
 
-  if (rank == 0) { //P1
-    // Initialize input data and shares
-    Data customer[ROWS_C][COLS_C] = {{2, 0, 0},
-                                  {1, 0, 0},
-                                  {3, 0, 0},
-                                  {5, 0, 0},
-                                  {6, 0, 0},
-                                  {8, 0, 0},
-                                  {7, 0, 0},
-                                  {4, 0, 0}};
+  // if (rank == 0) { //P1
+  //   // Initialize input data and shares
+  //   Data customer[ROWS_C][COLS_C] = {{2, 0, 0},
+  //                                 {1, 0, 0},
+  //                                 {3, 0, 0},
+  //                                 {5, 0, 0},
+  //                                 {6, 0, 0},
+  //                                 {8, 0, 0},
+  //                                 {7, 0, 0},
+  //                                 {4, 0, 0}};
 
-    Data orders[ROWS_O][COLS_O] = {{4, 2, 99-C, C-99, 0},
-                                    {6, 3, 99-C, C-99, 0},
-                                    {5, 2, 99-C, C-99, 0},
-                                    {4, 4, 99-C, C-99, 0},
-                                    {2, 1, 99-C, C-99, 0},
-                                    {1, 1, 99-C, C-99, 0},
-                                    {3, 1, 99-C, C-99, 0},
-                                    {7, 3, 99-C, C-99, 0},
-                                    {8, 4, 99-C, C-99, 0},
-                                    {10, 4, 0, 0, 0},
-                                    {9, 4, 0, 0, 0},
-                                    {13, 4, 0, 0, 0},
-                                    {15, 4, 0, 0, 0},
-                                    {14, 4, 99-C, C-99, 0},
-                                    {18, 4, 99-C, C-99, 0},
-                                    {17, 4, 99-C, C-99, 0}};
+  //   Data orders[ROWS_O][COLS_O] = {{4, 2, 99-C, C-99, 0},
+  //                                   {6, 3, 99-C, C-99, 0},
+  //                                   {5, 2, 99-C, C-99, 0},
+  //                                   {4, 4, 99-C, C-99, 0},
+  //                                   {2, 1, 99-C, C-99, 0},
+  //                                   {1, 1, 99-C, C-99, 0},
+  //                                   {3, 1, 99-C, C-99, 0},
+  //                                   {7, 3, 99-C, C-99, 0},
+  //                                   {8, 4, 99-C, C-99, 0},
+  //                                   {10, 4, 0, 0, 0},
+  //                                   {9, 4, 0, 0, 0},
+  //                                   {13, 4, 0, 0, 0},
+  //                                   {15, 4, 0, 0, 0},
+  //                                   {14, 4, 99-C, C-99, 0},
+  //                                   {18, 4, 99-C, C-99, 0},
+  //                                   {17, 4, 99-C, C-99, 0}};
 
-    Data ** c1 = allocate_2D_data_table(ROWS_C, COLS_C);
-    for (int i=0;i<ROWS_C;i++){
-      for(int j=0;j<COLS_C;j++){
-        c1[i][j] = customer[i][j];
-      }
-    }
+  //   Data ** c1 = allocate_2D_data_table(ROWS_C, COLS_C);
+  //   for (int i=0;i<ROWS_C;i++){
+  //     for(int j=0;j<COLS_C;j++){
+  //       c1[i][j] = customer[i][j];
+  //     }
+  //   }
 
-    Data ** c2 = allocate_2D_data_table(ROWS_O, COLS_O);
-    for (int i=0;i<ROWS_O;i++){
-      for(int j=0;j<COLS_O;j++){
-        c2[i][j] = orders[i][j];
-      }
-    }
+  //   Data ** c2 = allocate_2D_data_table(ROWS_O, COLS_O);
+  //   for (int i=0;i<ROWS_O;i++){
+  //     for(int j=0;j<COLS_O;j++){
+  //       c2[i][j] = orders[i][j];
+  //     }
+  //   }
 
-    Table r_customer = {-1, ROWS_C, COLS_C, c1};
-    Table r_order = {-1, ROWS_O, COLS_O, c2};
+  //   Table r_customer = {-1, ROWS_C, COLS_C, c1};
+  //   Table r_order = {-1, ROWS_O, COLS_O, c2};
 
-    // t1 Bshare tables for P2, P3 (local to P1)
-    BShareTable t12 = {-1, 1, ROWS_C, 2*COLS_C, 1};
-    allocate_bool_shares_table(&t12);
-    BShareTable t13 = {-1, 2, ROWS_C, 2*COLS_C, 1};
-    allocate_bool_shares_table(&t13);
+  //   // t1 Bshare tables for P2, P3 (local to P1)
+  //   BShareTable t12 = {-1, 1, ROWS_C, 2*COLS_C, 1};
+  //   allocate_bool_shares_table(&t12);
+  //   BShareTable t13 = {-1, 2, ROWS_C, 2*COLS_C, 1};
+  //   allocate_bool_shares_table(&t13);
 
-    // t2 Bshare tables for P2, P3 (local to P1)
-    BShareTable t22 = {-1, 1, ROWS_O, 2*COLS_O, 2};
-    allocate_bool_shares_table(&t22);
-    BShareTable t23 = {-1, 2, ROWS_O, 2*COLS_O, 2};
-    allocate_bool_shares_table(&t23);
+  //   // t2 Bshare tables for P2, P3 (local to P1)
+  //   BShareTable t22 = {-1, 1, ROWS_O, 2*COLS_O, 2};
+  //   allocate_bool_shares_table(&t22);
+  //   BShareTable t23 = {-1, 2, ROWS_O, 2*COLS_O, 2};
+  //   allocate_bool_shares_table(&t23);
 
-    init_sharing();
+  //   init_sharing();
 
-    // Generate boolean shares for r1
-    generate_bool_share_tables(&r_customer, &t1, &t12, &t13);
-    // Generate boolean shares for r2
-    generate_bool_share_tables(&r_order, &t2, &t22, &t23);
+  //   // Generate boolean shares for r1
+  //   generate_bool_share_tables(&r_customer, &t1, &t12, &t13);
+  //   // Generate boolean shares for r2
+  //   generate_bool_share_tables(&r_order, &t2, &t22, &t23);
 
-    //Send shares to P2
-    MPI_Send(&(t12.contents[0][0]), ROWS_C*2*COLS_C, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&(t22.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P2
+  //   MPI_Send(&(t12.contents[0][0]), ROWS_C*2*COLS_C, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&(t22.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
 
-    //Send shares to P3
-    MPI_Send(&(t13.contents[0][0]), ROWS_C*2*COLS_C, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    MPI_Send(&(t23.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   //Send shares to P3
+  //   MPI_Send(&(t13.contents[0][0]), ROWS_C*2*COLS_C, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+  //   MPI_Send(&(t23.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
 
-    // free temp tables
-    free(c1);
-    free(t12.contents);
-    free(t13.contents);
-    free(c2);
-    free(t22.contents);
-    free(t23.contents);
+  //   // free temp tables
+  //   free(c1);
+  //   free(t12.contents);
+  //   free(t13.contents);
+  //   free(c2);
+  //   free(t22.contents);
+  //   free(t23.contents);
 
-  }
-  else { //P2 or P3
-    MPI_Recv(&(t1.contents[0][0]), ROWS_C*2*COLS_C, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&(t2.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
+  // }
+  // else { //P2 or P3
+  //   MPI_Recv(&(t1.contents[0][0]), ROWS_C*2*COLS_C, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  //   MPI_Recv(&(t2.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  // }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -324,6 +324,6 @@ int main(int argc, char** argv) {
   free(t1.contents); free(t2.contents);
 
   // tear down communication
-  MPI_Finalize();
+  // MPI_Finalize();
   return 0;
 }
