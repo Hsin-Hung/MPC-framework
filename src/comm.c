@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-// #include "mpi.h"
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#define SA struct sockaddr
+#define PORT 8080
 
 #define PRIVATE static
 
@@ -13,20 +17,114 @@
 int rank, num_parties;
 int initialized = 0;
 
-PRIVATE void check_init(const char* f);
+PRIVATE void check_init(const char *f);
 
 // initialize MPI, rank, num_parties
-void init(int argc, char** argv) {
+void init(char *ip_next, uint host_port, uint conn_port)
+{
   // MPI_Init(&argc, &argv);
   // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   // MPI_Comm_size(MPI_COMM_WORLD, &num_parties);
 
+  // socket creation
+  int sockfd, connfd, len;
+  struct sockaddr_in servaddr, cli;
+  struct sockaddr_in conntoserv;
+
+  // socket create and verification
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd == -1)
+  {
+    printf("socket creation failed...\n");
+    exit(0);
+  }
+  else
+  {
+    printf("Socket successfully created..\n");
+  }
+
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(host_port);
+
+  // Binding newly created socket to given IP and verification
+  if ((bind(sockfd, (SA *)&servaddr, sizeof(servaddr))) != 0)
+  {
+    printf("socket bind failed...\n");
+    exit(0);
+  }
+  else
+  {
+    printf("Socket successfully binded..\n");
+  }
+
+  if ((listen(sockfd, 5)) != 0)
+  {
+    printf("Listen failed...\n");
+    exit(0);
+  }
+  else
+  {
+    printf("Server listening..\n");
+  }
+  len = sizeof(cli);
+
+  // Accept connection
+  while (1)
+  {
+    connfd = accept(sockfd, (SA *)&cli, &len);
+    if (connfd < 0)
+    {
+      printf("server accept failed...\n");
+      exit(0);
+    }
+    else
+    {
+      printf("server accept the client...\n");
+    }
+  }
+
+  close(sockfd);
   // this protocol works with 3 parties only
-  // if (rank == 0 && num_parties != NUM_PARTIES) {
-  //   fprintf(stderr, "ERROR: The number of MPI processes must be %d for %s\n", NUM_PARTIES, argv[0]);
-  //   MPI_Abort(MPI_COMM_WORLD, 1);
-  // }
-  initialized = 1;
+  /* if (rank == 0 && num_parties != NUM_PARTIES) {
+     fprintf(stderr, "ERROR: The number of MPI processes must be %d for %s\n", NUM_PARTIES, argv[0]);
+
+   }*/
+}
+
+void establish_connection(char *ip_next, uint conn_port)
+{
+
+  int sockfd, connfd;
+  struct sockaddr_in servaddr, cli;
+
+  // socket create and varification
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd == -1)
+  {
+    printf("socket creation failed...\n");
+    exit(0);
+  }
+  else
+    printf("Socket successfully created..\n");
+  bzero(&servaddr, sizeof(servaddr));
+
+  // assign IP, PORT
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = inet_addr(ip_next);
+  servaddr.sin_port = htons(conn_port);
+
+  // connect the client socket to server socket
+  if (connect(sockfd, (SA *)&servaddr, sizeof(servaddr)) != 0)
+  {
+    printf("connection with the server failed...\n");
+    exit(0);
+  }
+  else
+    printf("connected to the server..\n");
+
+  // close the socket
+  close(sockfd);
 }
 
 // finalize MPI: (VK: This doesn't work but I don't know why)
@@ -34,9 +132,9 @@ void init(int argc, char** argv) {
    MPI_Finalize();
 }*/
 
-
 // exchange boolean shares: this is blocking
-BShare exchange_shares(BShare s1) {
+BShare exchange_shares(BShare s1)
+{
   BShare s2;
   // send s1 to predecessor
   // MPI_Send(&s1, 1, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD);
@@ -47,7 +145,8 @@ BShare exchange_shares(BShare s1) {
 }
 
 // exchange boolean shares: this is blocking
-BShare exchange_shares_async(BShare s1) {
+BShare exchange_shares_async(BShare s1)
+{
   BShare s2;
   // MPI_Request r1, r2;
   // // receive remote share from successor
@@ -64,7 +163,8 @@ BShare exchange_shares_async(BShare s1) {
 }
 
 // exchange boolean shares: this is blocking
-unsigned long long exchange_shares_u(unsigned long long s1) {
+unsigned long long exchange_shares_u(unsigned long long s1)
+{
   unsigned long long s2;
   // send s1 to predecessor
   // MPI_Send(&s1, 1, MPI_UNSIGNED_LONG_LONG, get_pred(), XCHANGE_MSG_TAG,
@@ -77,7 +177,8 @@ unsigned long long exchange_shares_u(unsigned long long s1) {
 }
 
 // Exchanges single-bit boolean shares: this is blocking
-BitShare exchange_bit_shares(BitShare s1) {
+BitShare exchange_bit_shares(BitShare s1)
+{
   BitShare s2;
   // send s1 to predecessor
   // MPI_Send(&s1, 1, MPI_C_BOOL, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD);
@@ -87,32 +188,7 @@ BitShare exchange_bit_shares(BitShare s1) {
   return s2;
 }
 
-void exchange_shares_array(const BShare* shares1, BShare* shares2, long length) {
-  // MPI_Request r1, r2;
-  // // receive remote share from successor
-  // MPI_Irecv(shares2, length, MPI_LONG_LONG, get_succ(),
-  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
-  // // send s1 to predecessor
-  // MPI_Isend(shares1, length, MPI_LONG_LONG, get_pred(),
-  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-  // MPI_Wait(&r1, MPI_STATUS_IGNORE);
-  // MPI_Wait(&r2, MPI_STATUS_IGNORE);
-}
-
-void exchange_shares_array_u(const unsigned long long* shares1,
-                             unsigned long long* shares2, int length) {
-  // MPI_Request r1, r2;
-  // // receive remote share from successor
-  // MPI_Irecv(shares2, length, MPI_UNSIGNED_LONG_LONG, get_succ(),
-  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
-  // // send s1 to predecessor
-  // MPI_Isend(shares1, length, MPI_UNSIGNED_LONG_LONG, get_pred(),
-  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-  // MPI_Wait(&r1, MPI_STATUS_IGNORE);
-  // MPI_Wait(&r2, MPI_STATUS_IGNORE);
-}
-
-void exchange_a_shares_array(const AShare* shares1, AShare* shares2, int length)
+void exchange_shares_array(const BShare *shares1, BShare *shares2, long length)
 {
   // MPI_Request r1, r2;
   // // receive remote share from successor
@@ -125,9 +201,36 @@ void exchange_a_shares_array(const AShare* shares1, AShare* shares2, int length)
   // MPI_Wait(&r2, MPI_STATUS_IGNORE);
 }
 
+void exchange_shares_array_u(const unsigned long long *shares1,
+                             unsigned long long *shares2, int length)
+{
+  // MPI_Request r1, r2;
+  // // receive remote share from successor
+  // MPI_Irecv(shares2, length, MPI_UNSIGNED_LONG_LONG, get_succ(),
+  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  // // send s1 to predecessor
+  // MPI_Isend(shares1, length, MPI_UNSIGNED_LONG_LONG, get_pred(),
+  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  // MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  // MPI_Wait(&r2, MPI_STATUS_IGNORE);
+}
 
-void exchange_bit_shares_array(const BitShare* shares1, BitShare* shares2,
-                               int length) {
+void exchange_a_shares_array(const AShare *shares1, AShare *shares2, int length)
+{
+  // MPI_Request r1, r2;
+  // // receive remote share from successor
+  // MPI_Irecv(shares2, length, MPI_LONG_LONG, get_succ(),
+  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  // // send s1 to predecessor
+  // MPI_Isend(shares1, length, MPI_LONG_LONG, get_pred(),
+  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  // MPI_Wait(&r1, MPI_STATUS_IGNORE);
+  // MPI_Wait(&r2, MPI_STATUS_IGNORE);
+}
+
+void exchange_bit_shares_array(const BitShare *shares1, BitShare *shares2,
+                               int length)
+{
   // MPI_Request r1, r2;
   // // receive remote share from successor
   // MPI_Irecv(shares2, length, MPI_C_BOOL, get_succ(),
@@ -139,30 +242,35 @@ void exchange_bit_shares_array(const BitShare* shares1, BitShare* shares2,
   // MPI_Wait(&r2, MPI_STATUS_IGNORE);
 }
 
-
-int get_rank() {
-    check_init(__func__);
-    return rank;
+int get_rank()
+{
+  check_init(__func__);
+  return rank;
 }
 
-int get_succ() {
-    check_init(__func__);
-    return (get_rank() + 1) % NUM_PARTIES;
+int get_succ()
+{
+  check_init(__func__);
+  return (get_rank() + 1) % NUM_PARTIES;
 }
 
-int get_pred() {
-    check_init(__func__);
-    return ((get_rank() + NUM_PARTIES) - 1) % NUM_PARTIES;
+int get_pred()
+{
+  check_init(__func__);
+  return ((get_rank() + NUM_PARTIES) - 1) % NUM_PARTIES;
 }
 
 // [boolean share] open a value in P1 (rank=0)
-Data open_b(BShare s) {
+Data open_b(BShare s)
+{
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2) {
-      // MPI_Send(&s, 1, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
-      return s;
+  if (rank == 1 || rank == 2)
+  {
+    // MPI_Send(&s, 1, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
+    return s;
   }
-  else if (rank == 0) {
+  else if (rank == 0)
+  {
     Data msg, res = s;
     // P1 receives shares from P2, P3
     // MPI_Recv(&msg, 1, MPI_LONG_LONG, 1, OPEN_MSG_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -171,14 +279,16 @@ Data open_b(BShare s) {
     // res ^= msg;
     return res;
   }
-  else {
+  else
+  {
     fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
     return 1;
   }
 }
 
 // [boolean share] open a value in P1 (rank=0)
-Data open_bit(BitShare s) {
+Data open_bit(BitShare s)
+{
   // P2, P3 send their shares to P1
   // if (rank == 1 || rank == 2) {
   //     MPI_Send(&s, 1, MPI_C_BOOL, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
@@ -201,7 +311,8 @@ Data open_bit(BitShare s) {
 
 // [boolean share] open an array of values in P1 (rank=0)
 // MUST BE CALLED ONLY ONCE AS IT MUTATES THE GIVEN TABLE s
-void open_b_array(BShare *s, int len, Data res[]) {
+void open_b_array(BShare *s, int len, Data res[])
+{
   // P2, P3 send their shares to P1
   // if (rank == 1 || rank == 2) {
   //     MPI_Send(s, len, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
@@ -229,7 +340,8 @@ void open_b_array(BShare *s, int len, Data res[]) {
 
 // [boolean share] open an array of values in P1 (rank=0)
 // MUST BE CALLED ONLY ONCE AS IT MUTATES THE GIVEN TABLE s
-void open_byte_array(char *s, int len, char res[]) {
+void open_byte_array(char *s, int len, char res[])
+{
   // P2, P3 send their shares to P1
   // if (rank == 1 || rank == 2) {
   //     MPI_Send(s, len, MPI_CHAR, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
@@ -256,7 +368,8 @@ void open_byte_array(char *s, int len, char res[]) {
 }
 
 // [arithmetic share] open a value in P1 (rank=0)
-Data open_a(AShare s) {
+Data open_a(AShare s)
+{
   // P2, P3 send their shares to P1
   // if (rank == 1 || rank == 2) {
   //     MPI_Send(&s, 1, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
@@ -278,7 +391,8 @@ Data open_a(AShare s) {
 }
 
 // [arithmetic share] open an array of arithmetic shares in P1 (rank=0)
-void open_array(AShare *s, int len, Data res[]) {
+void open_array(AShare *s, int len, Data res[])
+{
 
   // P2, P3 send their shares to P1
   // if (rank == 1 || rank == 2) {
@@ -307,10 +421,11 @@ void open_array(AShare *s, int len, Data res[]) {
 
 // [arithmetic share] open an array of arithmetic shares in P1 (rank=0)
 void open_mixed_array(BShare *s, int rows, int cols, Data res[],
-                      unsigned* a, int al, unsigned *b, int bl) {
+                      unsigned *a, int al, unsigned *b, int bl)
+{
 
-  assert( (al+bl)==cols );
-  int len = rows*cols;
+  assert((al + bl) == cols);
+  int len = rows * cols;
   // P2, P3 send their shares to P1
   // if (rank == 1 || rank == 2) {
   //     MPI_Send(s, len, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
@@ -350,7 +465,8 @@ void open_mixed_array(BShare *s, int rows, int cols, Data res[],
   // }
 }
 
-void open_bit_array(BitShare *s, int len, bool res[]) {
+void open_bit_array(BitShare *s, int len, bool res[])
+{
   // P2, P3 send their shares to P1
   // if (rank == 1 || rank == 2) {
   //     MPI_Send(s, len, MPI_C_BOOL, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
@@ -378,7 +494,8 @@ void open_bit_array(BitShare *s, int len, bool res[]) {
 }
 
 // [boolean share] open a value in all parties
-Data reveal_b(BShare s) {
+Data reveal_b(BShare s)
+{
   Data res = s;
 
   // P2, P3 send their shares to P1 and receive the result
@@ -406,7 +523,8 @@ Data reveal_b(BShare s) {
 }
 
 // [boolean share] open an array of values in all parties
-void reveal_b_array(BShare *s, int len) {
+void reveal_b_array(BShare *s, int len)
+{
   // P2, P3 send their shares to P1 and receive the result
   // if (rank == 1 || rank == 2) {
   //     MPI_Send(s, len, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
@@ -434,7 +552,8 @@ void reveal_b_array(BShare *s, int len) {
   // }
 }
 
-void reveal_b_array_async(BShare *s, int len) {
+void reveal_b_array_async(BShare *s, int len)
+{
   // MPI_Request r1, r2;
   // // P2, P3 send their shares to P1 and receive the result
   // if (rank == 1 || rank == 2) {
@@ -473,7 +592,8 @@ void reveal_b_array_async(BShare *s, int len) {
 }
 
 // check if MPI has been initialized
-PRIVATE void check_init(const char* f) {
+PRIVATE void check_init(const char *f)
+{
   // if (!initialized) {
   //     fprintf(stderr, "ERROR: init() must be called before %s\n", f);
   //     MPI_Abort(MPI_COMM_WORLD, 1);

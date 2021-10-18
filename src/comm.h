@@ -3,14 +3,15 @@
 
 #include "mpctypes.h"
 #include "assert.h"
+#include <sys/types.h>
 
 /*******************************************************************
  * init:    Initializes MPI and retrieves each party's rank.
  *          This method needs to be called before any other exchange
  *          or computation method.
  * *****************************************************************/
-void init(int argc, char** argv);
-
+void init(char *ip_next, uint host_port, uint conn_port);
+void establish_connection(char* ip_next, uint conn_port);
 /*******************************************************************
  * close:   Cleanup and finalize MPI.
  * *****************************************************************/
