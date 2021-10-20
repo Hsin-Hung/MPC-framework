@@ -38,6 +38,7 @@ This project does not target those outside parties (data owner and data learner)
     - To set up standard socket connection, three data network packets to set up the socket connection
     
     ![image](https://github.com/msisk23/MPC_Project/blob/main/TCP%20Flow%20Diagram.png)
+    
     _**Figure 1: Flow Diagram of how a TCP Server operates.**_ 
 
 - Unikernel deployment
@@ -58,7 +59,8 @@ Crucial project components and definitions:
   - Multi Party Communication (MPC): Communication between three cloud services to ensure secure data transmission and evaluation
   - Secrecy: Application used to securely analyze private data
   - Master Orchestrator: entity that receives IP addresses of parties and passes them to other parties to establish socket connections and open TCP flow
-![image](https://github.com/msisk23/MPC_Project/blob/main/Diagram.jpg)
+![image](https://user-images.githubusercontent.com/61120367/134678604-cf5f5657-4c49-4310-be77-839b6323eb1e.png)
+
 _**Figure 2: Architecture of the MPC. Black components currently in use, blue components to be implemented.**_
 
 Figure 2 demonstrates the current structure of the MPC, and the structure to be implemented. Currently, MPI is used to enable communication between parties. During certain points of program execution, parties have to verify information with each other. In the current MPC implementation, parties can only communicate along the Main Thread one message at a time. In order to establish a non-blocking method of asynchronous verification, a Communication Thread (seen in blue) will replace MPI. Using TCP communication, input and output buffers will allow for the non-blocking transfer of data. Later, the data will be processed asynchronously to provide verification for each party. 
