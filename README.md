@@ -195,10 +195,3 @@ To build and run SysX on linux, edit the provided `Makefile` as follows:
     `exp-equality:   exp_equality.c $(PRIMITIVES) $(MPI) $(CFLAGS) -o exp-equality exp_equality.c $(PRIMITIVES) $(DEP)`
 
 
-## Demo 1
-
-https://youtu.be/9HV23bVlr6E
-
-## Demo 2
-
-https://youtu.be/NU8P3QJDxLk
