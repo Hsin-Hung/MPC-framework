@@ -10,12 +10,11 @@
  *          This method needs to be called before any other exchange
  *          or computation method.
  * *****************************************************************/
-void init(char *ip_next, uint host_port, uint conn_port);
-void establish_connection(char* ip_next, uint conn_port);
+void init(int argc, char** argv);
 /*******************************************************************
  * close:   Cleanup and finalize MPI.
  * *****************************************************************/
-void close();
+// void close();
 
 /*******************************************************************
  * get_rank:    Returns this party's rank.

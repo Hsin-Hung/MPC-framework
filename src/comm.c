@@ -20,111 +20,19 @@ int initialized = 0;
 PRIVATE void check_init(const char *f);
 
 // initialize MPI, rank, num_parties
-void init(char *ip_next, uint host_port, uint conn_port)
+void init(int argc, char** argv)
 {
   // MPI_Init(&argc, &argv);
+  TCP_Init(&argc, &argv);
   // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  TCP_Comm_rank(&rank);
   // MPI_Comm_size(MPI_COMM_WORLD, &num_parties);
-
-  // socket creation
-  int sockfd, connfd, len;
-  struct sockaddr_in servaddr, cli;
-  struct sockaddr_in conntoserv;
-
-  // socket create and verification
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd == -1)
-  {
-    printf("socket creation failed...\n");
-    exit(0);
-  }
-  else
-  {
-    printf("Socket successfully created..\n");
-  }
-
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(host_port);
-
-  // Binding newly created socket to given IP and verification
-  if ((bind(sockfd, (SA *)&servaddr, sizeof(servaddr))) != 0)
-  {
-    printf("socket bind failed...\n");
-    exit(0);
-  }
-  else
-  {
-    printf("Socket successfully binded..\n");
-  }
-
-  if ((listen(sockfd, 5)) != 0)
-  {
-    printf("Listen failed...\n");
-    exit(0);
-  }
-  else
-  {
-    printf("Server listening..\n");
-  }
-  len = sizeof(cli);
-
-  // Accept connection
-  while (1)
-  {
-    connfd = accept(sockfd, (SA *)&cli, &len);
-    if (connfd < 0)
-    {
-      printf("server accept failed...\n");
-      exit(0);
-    }
-    else
-    {
-      printf("server accept the client...\n");
-    }
-  }
-
-  close(sockfd);
+  TCP_Comm_size(&num_parties);
   // this protocol works with 3 parties only
-  /* if (rank == 0 && num_parties != NUM_PARTIES) {
+  if (rank == 0 && num_parties != NUM_PARTIES) {
      fprintf(stderr, "ERROR: The number of MPI processes must be %d for %s\n", NUM_PARTIES, argv[0]);
 
-   }*/
-}
-
-void establish_connection(char *ip_next, uint conn_port)
-{
-
-  int sockfd, connfd;
-  struct sockaddr_in servaddr, cli;
-
-  // socket create and varification
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd == -1)
-  {
-    printf("socket creation failed...\n");
-    exit(0);
-  }
-  else
-    printf("Socket successfully created..\n");
-  bzero(&servaddr, sizeof(servaddr));
-
-  // assign IP, PORT
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = inet_addr(ip_next);
-  servaddr.sin_port = htons(conn_port);
-
-  // connect the client socket to server socket
-  if (connect(sockfd, (SA *)&servaddr, sizeof(servaddr)) != 0)
-  {
-    printf("connection with the server failed...\n");
-    exit(0);
-  }
-  else
-    printf("connected to the server..\n");
-
-  // close the socket
-  close(sockfd);
+   }
 }
 
 // finalize MPI: (VK: This doesn't work but I don't know why)
@@ -138,9 +46,11 @@ BShare exchange_shares(BShare s1)
   BShare s2;
   // send s1 to predecessor
   // MPI_Send(&s1, 1, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD);
+  TCP_Send(&s1, 1, get_pred(), XCHANGE_MSG_TAG);
   // // receive remote seed from successor
   // MPI_Recv(&s2, 1, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG,
   //                                           MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  TCP_Recv(&s2, 1, get_succ(), XCHANGE_MSG_TAG);
   return s2;
 }
 
@@ -169,10 +79,12 @@ unsigned long long exchange_shares_u(unsigned long long s1)
   // send s1 to predecessor
   // MPI_Send(&s1, 1, MPI_UNSIGNED_LONG_LONG, get_pred(), XCHANGE_MSG_TAG,
   //                                                      MPI_COMM_WORLD);
+  TCP_Send(&s1, 1, get_pred(), XCHANGE_MSG_TAG);
   // // receive remote seed from successor
   // MPI_Recv(&s2, 1, MPI_UNSIGNED_LONG_LONG, get_succ(), XCHANGE_MSG_TAG,
   //                                                      MPI_COMM_WORLD,
   //                                                      MPI_STATUS_IGNORE);
+  TCP_Recv(&s2, 1, get_succ(), XCHANGE_MSG_TAG);
   return s2;
 }
 
@@ -182,9 +94,11 @@ BitShare exchange_bit_shares(BitShare s1)
   BitShare s2;
   // send s1 to predecessor
   // MPI_Send(&s1, 1, MPI_C_BOOL, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD);
+  TCP_Send(&s1, 1, get_pred(), XCHANGE_MSG_TAG);
   // // receive remote seed from successor
   // MPI_Recv(&s2, 1, MPI_C_BOOL, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD,
   //                                                         MPI_STATUS_IGNORE);
+  TCP_Recv(&s2, 1, get_succ(), XCHANGE_MSG_TAG);
   return s2;
 }
 
@@ -267,6 +181,7 @@ Data open_b(BShare s)
   if (rank == 1 || rank == 2)
   {
     // MPI_Send(&s, 1, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD);
+    TCP_Send(&s, 1, 0, OPEN_MSG_TAG);
     return s;
   }
   else if (rank == 0)
@@ -277,6 +192,7 @@ Data open_b(BShare s)
     // res ^= msg;
     // MPI_Recv(&msg, 1, MPI_LONG_LONG, 2, OPEN_MSG_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     // res ^= msg;
+    
     return res;
   }
   else
