@@ -125,8 +125,9 @@ void exchange_a_shares_array(const AShare *shares1, AShare *shares2, int length)
 {
   // MPI_Request r1, r2;
   // // receive remote share from successor
-  // MPI_Irecv(shares2, length, MPI_LONG_LONG, get_succ(),
-  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+
+    TCP_Irecv(shares2, length, get_succ(), XCHANGE_MSG_TAG, &r2);
+
   // // send s1 to predecessor
   // MPI_Isend(shares1, length, MPI_LONG_LONG, get_pred(),
   //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
@@ -139,8 +140,8 @@ void exchange_bit_shares_array(const BitShare *shares1, BitShare *shares2,
 {
   // MPI_Request r1, r2;
   // // receive remote share from successor
-  // MPI_Irecv(shares2, length, MPI_C_BOOL, get_succ(),
-  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+
+    TCP_Irecv(shares2, length, get_succ(), XCHANGE_MSG_TAG, &r2);
   // // send s1 to predecessor
   // MPI_Isend(shares1, length, MPI_C_BOOL, get_pred(),
   //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
@@ -480,7 +481,7 @@ void reveal_b_array_async(BShare *s, int len)
   // // P2, P3 send their shares to P1 and receive the result
   // if (rank == 1 || rank == 2) {
   //   MPI_Isend(s, len, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD, &r1);
-  //   MPI_Irecv(s, len, MPI_LONG_LONG, 0, OPEN_MSG_TAG, MPI_COMM_WORLD, &r2);
+  TCP_Irecv(s, len, 0, OPEN_MSG_TAG, &r2);
 
   //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
   //   MPI_Wait(&r2, MPI_STATUS_IGNORE);
@@ -491,8 +492,8 @@ void reveal_b_array_async(BShare *s, int len)
   //   Data *msg2 = malloc(len*sizeof(Data));
   //   assert(msg2!=NULL);
   //   // P1 receives shares from P2, P3
-  //   MPI_Irecv(&msg[0], len, MPI_LONG_LONG, 1, OPEN_MSG_TAG, MPI_COMM_WORLD, &r1);
-  //   MPI_Irecv(&msg2[0], len, MPI_LONG_LONG, 2, OPEN_MSG_TAG, MPI_COMM_WORLD, &r2);
+  TCP_Irecv(&msg[0], len, 1, OPEN_MSG_TAG, &r1);
+  TCP_Irecv(&msg2[0], len, 2, OPEN_MSG_TAG, &r2);
   //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
   //   MPI_Wait(&r2, MPI_STATUS_IGNORE);
 
