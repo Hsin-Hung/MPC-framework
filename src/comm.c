@@ -55,8 +55,9 @@ BShare exchange_shares_async(BShare s1)
   BShare s2;
   // MPI_Request r1, r2;
   // // receive remote share from successor
-  // MPI_Irecv(&s2, 1, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG,
-  //                                           MPI_COMM_WORLD, &r2);
+
+  TCP_Irecv(shares2, length, get_succ(), XCHANGE_MSG_TAG, &r2);
+
   // // send s1 to predecessor
   // MPI_Isend(&s1, 1, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG,
   //                                           MPI_COMM_WORLD, &r1);
@@ -96,8 +97,8 @@ void exchange_shares_array(const BShare *shares1, BShare *shares2, long length)
 {
   // MPI_Request r1, r2;
   // // receive remote share from successor
-  // MPI_Irecv(shares2, length, MPI_LONG_LONG, get_succ(),
-  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+
+  TCP_Irecv(shares2, length, get_succ(), XCHANGE_MSG_TAG, &r2);
   // // send s1 to predecessor
   // MPI_Isend(shares1, length, MPI_LONG_LONG, get_pred(),
   //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
@@ -110,8 +111,9 @@ void exchange_shares_array_u(const unsigned long long *shares1,
 {
   // MPI_Request r1, r2;
   // // receive remote share from successor
-  // MPI_Irecv(shares2, length, MPI_UNSIGNED_LONG_LONG, get_succ(),
-  //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+
+    TCP_Irecv(shares2, length, get_succ(), XCHANGE_MSG_TAG, &r2);
+
   // // send s1 to predecessor
   // MPI_Isend(shares1, length, MPI_UNSIGNED_LONG_LONG, get_pred(),
   //           XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
