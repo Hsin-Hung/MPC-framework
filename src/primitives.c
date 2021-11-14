@@ -285,7 +285,8 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
 
   //     // first 9 exchanges
   //     if ( ((i+1)%batch_size)==0 ) {
-  //       MPI_Irecv(&res2[i-(batch_size-1)], batch_size, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+  //       
+  	TCP_Irecv(&res2[i-(batch_size-1)], batch_size, get_succ(), XCHANGE_MSG_TAG, &r2);
   //       MPI_Isend(&res[i-(batch_size-1)], batch_size, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
   //     }
 
@@ -293,7 +294,7 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
   //     if (i == len-1) {
   //       MPI_Wait(&r1, MPI_STATUS_IGNORE);
   //       MPI_Wait(&r2, MPI_STATUS_IGNORE);
-  //       MPI_Irecv(&res2[len - batch_size], batch_size, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+         TCP_Irecv(&res2[len - batch_size], batch_size, get_succ(), XCHANGE_MSG_TAG, &r2);
   //       MPI_Isend(&res[len - batch_size], batch_size, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
   //     }
   //   }
@@ -342,7 +343,7 @@ void eq_b_array_inter_batch(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long
   //     // exchange result for element i, level l
   //     // except for the final round
   //     if (l != numlevels-1) {
-  //       MPI_Irecv(&res2[i], 1, MPI_LONG_LONG, get_succ(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2[i]);
+         TCP_Irecv(&res2[i], 1, get_succ(), XCHANGE_MSG_TAG, &r2[i]);
   //       MPI_Isend(&res[i], 1, MPI_LONG_LONG, get_pred(), XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1[i]);
   //     }
   //   }
@@ -1299,13 +1300,13 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   //   free(z12); free(z13);
 
   //   // receive share of x3 from P3
-  //   MPI_Irecv(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+     TCP_Irecv(w1, len, 2, XCHANGE_MSG_TAG, &r1);
   //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
 
   //   // generate pairs of random binary shares (R1)
   //   get_next_rb_pair_array(xb2, xb1, len);
   //   // receive share from P2 and compute xb1
-  //   MPI_Irecv(r_temp, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+  	  TCP_Irecv(r_temp, len, 1, XCHANGE_MSG_TAG, &r1);
   //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
   //   // compute xb1
   //   for (int i=0; i<len; i++) {
@@ -1319,9 +1320,9 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   // }
   // else if (get_rank() == 1) { //P2
   //   // receive share of x1+x2 frm P1
-  //   MPI_Irecv(xa1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+     TCP_Irecv(xa1, len, 0, XCHANGE_MSG_TAG, &r1);
   //   // receive share of x3
-  //   MPI_Irecv(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+    TCP_Irecv(w1, len, 2, XCHANGE_MSG_TAG, &r2);
   //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
   //   MPI_Wait(&r2, MPI_STATUS_IGNORE);
 
@@ -1334,7 +1335,7 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   //   // generate pairs of random binary shares (R2)
   //   get_next_rb_pair_array(r_temp, xb1, len);
   //   // receive share from P3 and compute xb1
-  //   MPI_Irecv(r_temp2, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+     TCP_Irecv(r_temp2, len, 2, XCHANGE_MSG_TAG, &r1);
   //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
   //   // compute xb1
   //   for (int i=0; i<len; i++) {
@@ -1353,7 +1354,7 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   //   }
 
   //   // receive share of x1+x2 frm P1
-  //   MPI_Irecv(xa1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
+     TCP_Irecv(xa1, len, 0, XCHANGE_MSG_TAG, &r1);
   //   MPI_Wait(&r1, MPI_STATUS_IGNORE);
 
   //   // distribute shares to P1, P2
@@ -1397,8 +1398,8 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   //     MPI_Isend(w1, len, MPI_LONG_LONG, 2, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
   //     MPI_Wait(&r1, MPI_STATUS_IGNORE);
   // } else { // P3
-  //     MPI_Irecv(xb1, len, MPI_LONG_LONG, 0, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r1);
-  //     MPI_Irecv(xa1, len, MPI_LONG_LONG, 1, XCHANGE_MSG_TAG, MPI_COMM_WORLD, &r2);
+      TCP_Irecv(xb1, len, 0, XCHANGE_MSG_TAG, &r1);
+      TCP_Irecv(xa1, len, 1, XCHANGE_MSG_TAG, &r2);
 
   //     MPI_Wait(&r1, MPI_STATUS_IGNORE);
   //     MPI_Wait(&r2, MPI_STATUS_IGNORE);
