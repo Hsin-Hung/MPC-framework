@@ -256,7 +256,7 @@ void open_b_array(BShare *s, int len, Data res[])
 // MUST BE CALLED ONLY ONCE AS IT MUTATES THE GIVEN TABLE s
 void open_byte_array(char *s, int len, char res[])
 {
-  P2, P3 send their shares to P1
+  // P2, P3 send their shares to P1
   if (rank == 1 || rank == 2) {
 
     TCP_Send(s, len, 0, OPEN_MSG_TAG);

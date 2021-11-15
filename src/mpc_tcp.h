@@ -1,9 +1,16 @@
 #include <sys/poll.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+
+#define PORT 8080
+#define TRUE 1
+#define FALSE 0
 
 struct TCP_Request
 {
 
     int socket_fd;
+    struct sockaddr_in socket_addr;
     int count;
     struct pollfd fds[200];
     void *buf;
@@ -11,7 +18,7 @@ struct TCP_Request
 };
 
 char *get_address(int rank);
-// args: the number of parties, assume we have mapping between rank -> ip:port 
+// args: the number of parties, assume we have mapping between rank -> ip:port
 int TCP_Init(int *argc, char ***argv);
 
 /* assign a rank for this party */
