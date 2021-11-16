@@ -2,6 +2,9 @@
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 
+#ifndef MPC_TCP_H
+#define MPC_TCP_H
+
 #define PORT 8080
 #define TRUE 1
 #define FALSE 0
@@ -41,3 +44,5 @@ int TCP_Irecv(void *buf, int count, int source, int tag, struct TCP_Request *r);
 
 // Waits for an MPI send or receive to complete.
 int TCP_Wait(struct TCP_Request *r);
+
+#endif

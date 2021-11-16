@@ -1,7 +1,6 @@
 #include "party.h"
 
 #include <sodium.h>
-// #include "mpi.h"
 #include "mpctypes.h"
 
 #define PRIVATE static

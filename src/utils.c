@@ -1,5 +1,4 @@
 #include "utils.h"
-// #include "mpi.h"
 
 #define SHARE_TAG 193
 
