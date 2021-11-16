@@ -8,10 +8,51 @@
 #include <string.h>
 #include <sys/poll.h>
 #include "mpc_tcp.h"
-#define PORT 8080
+
+#define RANK_ZERO_IP "10.0.0.91"
+#define RANK_ONE_IP "10.0.0.67"
+#define RANK_TWO_IP "10.0.0.179"
 
 /* get the IP address of given rank */
 char *get_address(int rank)
+{
+    if (rank == 0)
+    {
+
+        return RANK_ZERO_IP;
+    }
+    else if (rank == 1)
+    {
+        return RANK_ONE_IP;
+    }
+    else if (rank == 2)
+    {
+        return RANK_TWO_IP;
+    }
+    else
+    {
+
+        printf("No such rank!");
+        exit(-1);
+    }
+
+    return 0;
+}
+
+int TCP_Init(int *argc, char ***argv)
+{
+
+    return 0;
+}
+
+int TCP_Comm_rank(int *rank)
+{
+
+    
+    return 0;
+}
+
+int TCP_Comm_size(int *size)
 {
 
     return 0;
@@ -32,7 +73,7 @@ int TCP_Send(const void *buf, int count, int dest, int tag)
     serv_addr.sin_port = htons(PORT);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0)
+    if (inet_pton(AF_INET, get_address(dest), &serv_addr.sin_addr) <= 0)
     {
         printf("\nInvalid address/ Address not supported \n");
         return -1;
@@ -127,7 +168,7 @@ int TCP_Isend(const void *buf, int count, int dest, int tag, struct TCP_Request 
     socket_addr->sin_port = htons(PORT);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, "127.0.0.1", &(socket_addr->sin_addr)) <= 0)
+    if (inet_pton(AF_INET, get_address(dest), &(socket_addr->sin_addr)) <= 0)
     {
         printf("\nInvalid address/ Address not supported \n");
         return -1;
@@ -200,7 +241,7 @@ int TCP_Irecv(void *buf, int count, int source, int tag, struct TCP_Request *r)
     r->socket_fd = server_fd;
     r->flag = 1;
     r->buf = buf;
-    
+
     return 0;
 }
 

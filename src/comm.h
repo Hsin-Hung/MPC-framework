@@ -3,6 +3,7 @@
 
 #include "mpctypes.h"
 #include "assert.h"
+#include "mpc_tcp.h"
 #include <sys/types.h>
 
 /*******************************************************************

@@ -5,7 +5,7 @@
 #ifndef MPC_TCP_H
 #define MPC_TCP_H
 
-#define PORT 8080
+#define PORT 8000
 #define TRUE 1
 #define FALSE 0
 

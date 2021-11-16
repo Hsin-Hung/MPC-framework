@@ -2,6 +2,7 @@
 #define PARTY_H
 
 #include "mpctypes.h"
+#include "mpc_tcp.h"
 
 /*******************************************************************
  * exchange_rsz_seeds: Initializes the party's random generator for

@@ -1,5 +1,4 @@
 #include "primitives.h"
-#include "mpc_tcp.h"
 #include "utils.h"
 
 #define PRIVATE static

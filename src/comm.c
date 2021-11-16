@@ -5,7 +5,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include "mpc_tcp.h"
 
 #define SA struct sockaddr
 #define PORT 8080
@@ -16,7 +15,7 @@
 #define XCHANGE_MSG_TAG 7
 #define OPEN_MSG_TAG 777
 
-int rank, num_parties;
+int rank, num_parties = 3;
 int initialized = 0;
 
 PRIVATE void check_init(const char *f);
@@ -46,7 +45,6 @@ BShare exchange_shares(BShare s1)
   // send s1 to predecessor
   TCP_Send(&s1, 1, get_pred(), XCHANGE_MSG_TAG);
   // // receive remote seed from successor
-
   TCP_Recv(&s2, 1, get_succ(), XCHANGE_MSG_TAG);
   return s2;
 }
