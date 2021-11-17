@@ -51,18 +51,16 @@ int main(int argc, char **argv)
                 generate_bool_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
             }
         }
-        
-        sr = exchange_shares_async(r1s1[0][0]);
-        printf("rank %d, data recved: %lld", rank, sr);
+
+        TCP_Send(r1s1[0][0], 1, get_pred(), SHARE_TAG);
+        TCP_Recv(r1s1[0][0], 1, get_succ(), SHARE_TAG);
     }
     else if (rank == 1)
     {
-        sr = exchange_shares_async(r1s1[0][0]);
-        printf("rank %d, data recved: %lld", rank, sr);
+        sr = exchange_shares(r1s1[0][0]);
     }
     else
     {
-        sr = exchange_shares_async(r1s1[0][0]);
-        printf("rank %d, data recved: %lld", rank, sr);
+        sr = exchange_shares(r1s1[0][0]);
     }
 }

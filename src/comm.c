@@ -45,9 +45,9 @@ BShare exchange_shares(BShare s1)
 {
   BShare s2;
   // send s1 to predecessor
+  TCP_Recv(&s2, 1, get_succ(), XCHANGE_MSG_TAG);
   TCP_Send(&s1, 1, get_pred(), XCHANGE_MSG_TAG);
   // // receive remote seed from successor
-  TCP_Recv(&s2, 1, get_succ(), XCHANGE_MSG_TAG);
   return s2;
 }
 
