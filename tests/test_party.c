@@ -51,16 +51,16 @@ int main(int argc, char **argv)
             }
         }
 
-        TCP_Send("abcdefghi", 5 * 2, 1, SHARE_TAG);
+        TCP_Send(&r1s2[0][0], 5 * 2, 1, SHARE_TAG);
     }
     else if (rank == 1)
     {
 
-        TCP_Recv(buf, 5 * 2, 0, SHARE_TAG);
-        TCP_Send(buf, 5 * 2, 2, SHARE_TAG);
+        TCP_Recv(&r1s1[0][0], 5 * 2, 0, SHARE_TAG);
+        TCP_Send(&r1s1[0][0], 5 * 2, 2, SHARE_TAG);
     }
     else
     {
-        TCP_Recv(buf, 5 * 2, 1, SHARE_TAG);
+        TCP_Recv(&r1s1[0][0], 5 * 2, 1, SHARE_TAG);
     }
 }
