@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 
     // initialize communication
     init(argc, argv);
-
+    char buf[10];
     const int rank = get_rank();
     const int pred = get_pred();
     const int succ = get_succ();
@@ -38,6 +38,7 @@ int main(int argc, char **argv)
             for (int j = 0; j < COLS1; j++)
             {
                 generate_bool_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
+                printf("shares: %lld", r1s2[i][j]);
             }
         }
 
@@ -50,16 +51,19 @@ int main(int argc, char **argv)
             }
         }
 
-        TCP_Send(&r1s2[0][0], 5 * 2, 1, SHARE_TAG);
+
+
+        TCP_Send("abcdefghij", 5 * 2, 1, SHARE_TAG);
 
     }
     else if (rank == 1)
     {
-        TCP_Recv(&r1s1[0][0], 5 * 2, 0, SHARE_TAG);
-        TCP_Send(&r1s1[0][0], 5 * 2, 2, SHARE_TAG);
+    
+        TCP_Recv(buf, 5 * 2, 0, SHARE_TAG);
+        TCP_Send(buf, 5 * 2, 2, SHARE_TAG);
     }
     else
     {
-        TCP_Recv(&r1s1[0][0], 5 * 2, 1, SHARE_TAG);
+        TCP_Recv(buf, 5 * 2, 1, SHARE_TAG);
     }
 }

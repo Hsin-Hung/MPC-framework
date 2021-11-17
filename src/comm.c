@@ -15,7 +15,7 @@
 #define XCHANGE_MSG_TAG 7
 #define OPEN_MSG_TAG 777
 
-int rank, num_parties = 3;
+int rank = 0, num_parties = 3;
 int initialized = 0;
 
 PRIVATE void check_init(const char *f);
@@ -31,6 +31,8 @@ void init(int argc, char **argv)
   {
     fprintf(stderr, "ERROR: The number of MPI processes must be %d for %s\n", NUM_PARTIES, argv[0]);
   }
+
+  initialized = 1;
 }
 
 // finalize MPI: (VK: This doesn't work but I don't know why)
