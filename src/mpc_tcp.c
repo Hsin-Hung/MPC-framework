@@ -86,7 +86,7 @@ int TCP_Send(const void *buf, int count, int dest, int tag)
     }
 
     ssize_t n;
-    const char *p = buf;
+    const void *p = buf;
     uint32_t msg_size = htonl((uint32_t)count);
     send(sock, &msg_size, sizeof(msg_size), 0);
     while (count > 0)

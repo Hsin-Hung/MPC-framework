@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     // r1: first relation with 5 rows, r2: second relation with 4 rows
     BShare r1s1[ROWS1][COLS1], r1s2[ROWS1][COLS1], r1s3[ROWS1][COLS1],
         r2s1[ROWS2][COLS2], r2s2[ROWS2][COLS2], r2s3[ROWS2][COLS2];
-
+    r1s1[0][0] = 1;
     if (rank == 0)
     { // P1
         // Initialize input data and shares
@@ -39,7 +39,6 @@ int main(int argc, char **argv)
             for (int j = 0; j < COLS1; j++)
             {
                 generate_bool_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
-                printf("shares: %lld", r1s2[i][j]);
             }
         }
 
@@ -51,16 +50,19 @@ int main(int argc, char **argv)
                 generate_bool_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
             }
         }
-
+ 
         TCP_Send(r1s1[0][0], 1, get_pred(), SHARE_TAG);
         TCP_Recv(r1s1[0][0], 1, get_succ(), SHARE_TAG);
+        printf("receive %lld", r1s1[0][0]);
     }
     else if (rank == 1)
     {
         sr = exchange_shares(r1s1[0][0]);
+        printf("receive %lld", sr);
     }
     else
     {
         sr = exchange_shares(r1s1[0][0]);
+        printf("receive %lld", sr);
     }
 }
