@@ -23,6 +23,10 @@ PRIVATE void check_init(const char *f);
 // initialize MPI, rank, num_parties
 void init(int argc, char **argv)
 {
+  char *a = argv[1];
+  int num = atoi(a);
+  rank = num;
+  
   TCP_Init(&argc, &argv);
   TCP_Comm_rank(&rank);
   TCP_Comm_size(&num_parties);
