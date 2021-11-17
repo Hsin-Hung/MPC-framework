@@ -134,5 +134,8 @@ test-client:	test_client.c
 test-party:	test_party.c $(PRIMITIVES) $(BASELINE)
 			$(CC) $(CFLAGS) -o test-party test_party.c $(PRIMITIVES) $(BASELINE)
 
+test-async:	test_async.c $(PRIMITIVES) $(BASELINE)
+			$(CC) $(CFLAGS) -o test-async test_async.c $(PRIMITIVES) $(BASELINE)
+
 clean:
-			rm -f test-init test-conn test-tpch-q6 test-conversion test-primitives test-rsz test-share test-select test-rca test-and-all test-equality test-relational test-group test-distinct test-sort test-inequality test-join test-in test-mask test-arithmetic-to-binary test-ageq test-group-join test-group-min-max test-q1 test-q2 test-q3 test-tpch-q4 test-tpch-q4-baseline test-tpch-q13 test-tpch-q13-baseline test-qpwd test-qpwd-baseline test-qcredit test-qcredit-baseline test-server test-client test-party *.o *.exec
+			rm -f test-init test-conn test-tpch-q6 test-conversion test-primitives test-rsz test-share test-select test-rca test-and-all test-equality test-relational test-group test-distinct test-sort test-inequality test-join test-in test-mask test-arithmetic-to-binary test-ageq test-group-join test-group-min-max test-q1 test-q2 test-q3 test-tpch-q4 test-tpch-q4-baseline test-tpch-q13 test-tpch-q13-baseline test-qpwd test-qpwd-baseline test-qcredit test-qcredit-baseline test-server test-client test-party test-async *.o *.exec
