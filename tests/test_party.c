@@ -32,14 +32,14 @@ int main(int argc, char **argv)
 
         init_sharing();
 
-        printf("Shares: \n");
+     
         // generate r1 shares
         for (int i = 0; i < ROWS1; i++)
         {
             for (int j = 0; j < COLS1; j++)
             {
                 generate_bool_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
-                printf("%lld ", r1s2[i][j]);
+              
             }
         }
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
                 generate_bool_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
             }
         }
-        printf("\n");
+      
         TCP_Send(&r1s2[0][0], 5 * 2, 1, SHARE_TAG);
     }
     else if (rank == 1)
