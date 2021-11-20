@@ -149,7 +149,7 @@ int TCP_Recv(void *buf, int count, int source, int tag)
     msg_size = ntohl(msg_size);
     printf("msg_size %d\n", msg_size);
     valread = read(new_socket, buf, msg_size);
-    printf("valread: %d ,buf: %s\n", valread, buf);
+    printf("valread: %d ,buf: %lld\n", valread, buf);
     return 0;
 }
 
