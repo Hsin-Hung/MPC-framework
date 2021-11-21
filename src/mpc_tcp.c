@@ -8,10 +8,28 @@
 #include <string.h>
 #include <sys/poll.h>
 #include "mpc_tcp.h"
+#include "comm.h"
 
-#define RANK_ZERO_IP "10.0.0.91"
-#define RANK_ONE_IP "10.0.0.67"
-#define RANK_TWO_IP "10.0.0.179"
+// #define RANK_ZERO_IP "10.0.0.91"
+// #define RANK_ONE_IP "10.0.0.67"
+// #define RANK_TWO_IP "10.0.0.179"
+
+#define RANK_ZERO_IP "127.0.0.1"
+#define RANK_ONE_IP "127.0.0.1"
+#define RANK_TWO_IP "127.0.0.1"
+
+int get_socket(int party_rank)
+{
+
+    if (party_rank == get_succ())
+    {
+        return succ_sock;
+    }
+    else
+    {
+        return pred_sock;
+    }
+}
 
 /* get the IP address of given rank */
 char *get_address(int rank)
@@ -41,24 +59,23 @@ char *get_address(int rank)
 
 int TCP_Init(int *argc, char ***argv)
 {
+    /* init party 0 last */
+    if (get_rank() == 0)
+    {
+        TCP_Connect(get_succ());
+        TCP_Accept(get_pred());
+    }
+    else
+    {
+
+        TCP_Accept(get_pred());
+        TCP_Connect(get_succ());
+    }
 
     return 0;
 }
 
-int TCP_Comm_rank(int *rank)
-{
-
-    
-    return 0;
-}
-
-int TCP_Comm_size(int *size)
-{
-
-    return 0;
-}
-
-int TCP_Send(const void *buf, int count, int dest, int tag)
+int TCP_Connect(int dest)
 {
 
     int sock = 0, valread;
@@ -70,7 +87,7 @@ int TCP_Send(const void *buf, int count, int dest, int tag)
     }
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_port = htons(PORT + dest);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, get_address(dest), &serv_addr.sin_addr) <= 0)
@@ -85,24 +102,12 @@ int TCP_Send(const void *buf, int count, int dest, int tag)
         return -1;
     }
 
-    ssize_t n;
-    const void *p = buf;
-    uint32_t msg_size = htonl((uint32_t)count);
-    send(sock, &msg_size, sizeof(msg_size), 0);
-    while (count > 0)
-    {
-        n = send(sock, buf, count, 0);
-        if (n <= 0)
-            return -1;
-        p += n;
-        count -= n;
-    }
-
-    return 0;
+    succ_sock = sock;
 }
 
-int TCP_Recv(void *buf, int count, int source, int tag)
+int TCP_Accept(int source)
 {
+
     int server_fd, new_socket, valread;
     struct sockaddr_in address;
     int opt = 1;
@@ -124,7 +129,7 @@ int TCP_Recv(void *buf, int count, int source, int tag)
     }
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
+    address.sin_port = htons(PORT + get_rank());
 
     // Forcefully attaching socket to the port 8080
     if (bind(server_fd, (struct sockaddr *)&address,
@@ -144,16 +149,56 @@ int TCP_Recv(void *buf, int count, int source, int tag)
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    uint32_t msg_size;
-    valread = read(new_socket, &msg_size, sizeof(msg_size));
-    msg_size = ntohl(msg_size);
-    printf("msg_size %d\n", msg_size);
-    valread = read(new_socket, buf, msg_size);
-    printf("valread: %d ,buf: %s\n", valread, buf);
+
+    pred_sock = new_socket;
+}
+
+int TCP_Comm_rank(int *rank)
+{
+
     return 0;
 }
 
-int TCP_Isend(const void *buf, int count, int dest, int tag, struct TCP_Request *r)
+int TCP_Comm_size(int *size)
+{
+
+    return 0;
+}
+
+int TCP_Send(const void *buf, int count, int dest, int data_size)
+{
+
+    ssize_t n;
+    const void *p = buf;
+    while (count * data_size > 0)
+    {
+        n = send(get_socket(dest), p, count, 0);
+        if (n <= 0)
+            return -1;
+        p += n;
+        count -= n;
+    }
+
+    return 0;
+}
+
+int TCP_Recv(void *buf, int count, int source, int data_size)
+{
+    ssize_t n;
+    const void *p = buf;
+    while (count * data_size > 0)
+    {
+        n = read(get_socket(source), p, count * data_size);
+        if (n <= 0)
+            return -1;
+        p += n;
+        count -= n;
+    }
+
+    return 0;
+}
+
+int TCP_Isend(const void *buf, int count, int dest, int data_size, struct TCP_Request *r)
 {
 
     int sock = 0, valread, on = 1;
@@ -189,7 +234,7 @@ int TCP_Isend(const void *buf, int count, int dest, int tag, struct TCP_Request 
     return 0;
 }
 
-int TCP_Irecv(void *buf, int count, int source, int tag, struct TCP_Request *r)
+int TCP_Irecv(void *buf, int count, int source, int data_size, struct TCP_Request *r)
 {
 
     int server_fd, new_socket, valread, on = 1;

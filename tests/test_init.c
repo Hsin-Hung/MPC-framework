@@ -1,20 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
+#include <unistd.h>
 #include "test-utils.h"
 
 int main(int argc, char **argv)
 {
-    if(argc < 3){
-        printf("Not enough arguments!");
-        exit(0);
+    init(argc, argv);
+    char buf[20];
+    if (get_rank() == 0)
+    {
+
+        TCP_Send("Hello World!", 13, get_succ(), 1);
+        TCP_Recv(buf, 13, get_pred(), 1);
     }
-
-    uint host_ip = atoi(argv[1]), conn_ip = atoi(argv[2]);
-
-    char *ip = "127.0.0.1";
-    init(ip, host_ip, conn_ip);
+    else if (get_rank() == 1)
+    {
+        TCP_Recv(buf, 13, get_pred(), 1);
+        TCP_Send(buf, 13, get_succ(), 1);
+    }
+    else
+    {
+        TCP_Recv(buf, 13, get_pred(), 1);
+        TCP_Send(buf, 13, get_succ(), 1);
+    }
 
     return 0;
 }
