@@ -170,7 +170,8 @@ int TCP_Send(const void *buf, int count, int dest, int data_size)
 
     ssize_t n;
     const void *p = buf;
-    while (count * data_size > 0)
+    count = count * data_size;
+    while (count> 0)
     {
         n = send(get_socket(dest), p, count, 0);
         if (n <= 0)
@@ -186,9 +187,10 @@ int TCP_Recv(void *buf, int count, int source, int data_size)
 {
     ssize_t n;
     const void *p = buf;
-    while (count * data_size > 0)
+    count =  count * data_size;
+    while (count > 0)
     {
-        n = read(get_socket(source), p, count * data_size);
+        n = read(get_socket(source), p, count);
         if (n <= 0)
             return -1;
         p += n;

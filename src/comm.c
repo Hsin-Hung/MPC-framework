@@ -50,8 +50,8 @@ BShare exchange_shares(BShare s1)
 {
   BShare s2;
   // send s1 to predecessor
-  TCP_Recv(&s2, 1, get_succ(), sizeof(BShare));
   TCP_Send(&s1, 1, get_pred(), sizeof(BShare));
+  TCP_Recv(&s2, 1, get_succ(), sizeof(BShare));
   // // receive remote seed from successor
   return s2;
 }
@@ -64,7 +64,7 @@ BShare exchange_shares_async(BShare s1)
   struct TCP_Request r1, r2;
 
   TCP_Irecv(&s2, 1, get_succ(), sizeof(BShare), &r2);
-  TCP_Isend(&s1, 1, get_pred(),sizeof(BShare), &r1);
+  TCP_Isend(&s1, 1, get_pred(), sizeof(BShare), &r1);
   // // send s1 to predecessor
 
   TCP_Wait(&r1);
@@ -104,12 +104,14 @@ void exchange_shares_array(const BShare *shares1, BShare *shares2, long length)
   // // receive remote share from successor
   struct TCP_Request r1, r2;
 
-  TCP_Irecv(shares2, length, get_succ(), sizeof(BShare), &r2);
-  TCP_Isend(shares1, length, get_pred(), sizeof(BShare), &r1);
-  // // send s1 to predecessor
+  // TCP_Irecv(shares2, length, get_succ(), sizeof(BShare), &r2);
+  // TCP_Isend(shares1, length, get_pred(), sizeof(BShare), &r1);
+  // // // send s1 to predecessor
 
-  TCP_Wait(&r1);
-  TCP_Wait(&r2);
+  // TCP_Wait(&r1);
+  // TCP_Wait(&r2);
+      TCP_Send(shares1, length, get_pred(), sizeof(BShare));
+      TCP_Recv(shares2, length, get_succ(), sizeof(BShare));
 }
 
 void exchange_shares_array_u(const unsigned long long *shares1,
