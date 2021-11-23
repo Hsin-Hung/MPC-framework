@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
-#include "test-utils.h"
+#include "../src/comm.h"
+#include "../src/mpc_tcp.h"
 
 int main(int argc, char **argv)
 {
     init(argc, argv);
     char buf1[20], buf2[20], buf3[20];
-    if (get_rank() == 0)
+    /*if (get_rank() == 0)
     {
 
         TCP_Send("Hello 1!", 9, 1, 1);
@@ -36,5 +37,6 @@ int main(int argc, char **argv)
     printf("buf2: %s", buf2);
     printf("buf3: %s", buf3);
 
+    */
     return 0;
 }

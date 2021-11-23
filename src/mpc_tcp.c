@@ -14,9 +14,13 @@
 // #define RANK_ONE_IP "10.0.0.67"
 // #define RANK_TWO_IP "10.0.0.179"
 
-#define RANK_ZERO_IP "127.0.0.1"
-#define RANK_ONE_IP "127.0.0.1"
-#define RANK_TWO_IP "127.0.0.1"
+// #define RANK_ZERO_IP "127.0.0.1"
+// #define RANK_ONE_IP "127.0.0.1"
+// #define RANK_TWO_IP "127.0.0.1"
+
+char RANK_ZERO_IP[15];
+char RANK_ONE_IP[15];
+char RANK_TWO_IP[15];
 
 int get_socket(int party_rank)
 {
@@ -58,9 +62,41 @@ char *get_address(int rank)
 }
 
 int TCP_Init(int *argc, char ***argv)
-{
-    /* init party 0 last */
-    if (get_rank() == 0)
+{   
+    char *file_path = argv[2];
+    FILE *fptr = fopen(file_path, 'r');
+    for (int i = 0; i < 3; i++)
+    {
+        char *lineptr = NULL;
+        size_t len = 0;
+        if (i==0)
+        {
+            int n = getline(&lineptr, &len, fptr);
+            strcpy(RANK_ZERO_IP, lineptr);
+            free(lineptr);
+          //  free(&len);
+            printf("%s\n", RANK_ZERO_IP);
+        }
+        if (i==1)
+        {
+            int n = getline(&lineptr, &len, fptr);
+            strcpy(RANK_ONE_IP, lineptr);
+            free(lineptr);
+           // free(&len);
+            printf("%s\n", RANK_ONE_IP);
+        }
+        if (i==2)
+        {
+            int n = getline(&lineptr, &len, fptr);
+            strcpy(RANK_TWO_IP, lineptr);
+            free(lineptr);
+           // free(&len);
+            printf("%s\n", RANK_TWO_IP);
+        }
+    }
+    fclose(fptr);
+        /* init party 0 last */
+    /*if (get_rank() == 0)
     {
         TCP_Connect(get_succ());
         TCP_Accept(get_pred());
@@ -71,6 +107,7 @@ int TCP_Init(int *argc, char ***argv)
         TCP_Accept(get_pred());
         TCP_Connect(get_succ());
     }
+    */
 
     return 0;
 }
