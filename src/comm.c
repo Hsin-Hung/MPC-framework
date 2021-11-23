@@ -28,7 +28,7 @@ void init(int argc, char **argv)
   
   initialized = 1;
 
-  TCP_Init(&argc, &argv);
+  TCP_Init(argc, argv);
   TCP_Comm_rank(&rank);
   TCP_Comm_size(&num_parties);
   // this protocol works with 3 parties only
