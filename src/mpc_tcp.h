@@ -26,7 +26,7 @@ int get_socket(int party_rank);
 
 char *get_address(int rank);
 // args: the number of parties, assume we have mapping between rank -> ip:port
-int TCP_Init(int *argc, char ***argv);
+int TCP_Init(int argc, char **argv);
 
 /* assign a rank for this party */
 int TCP_Comm_rank(int *rank);

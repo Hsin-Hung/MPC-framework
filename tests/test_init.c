@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
-#include "../src/comm.h"
-#include "../src/mpc_tcp.h"
+#include "test-utils.h"
 
 int main(int argc, char **argv)
 {

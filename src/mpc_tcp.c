@@ -61,10 +61,15 @@ char *get_address(int rank)
     return 0;
 }
 
-int TCP_Init(int *argc, char ***argv)
-{   
+int TCP_Init(int argc, char **argv)
+{
     char *file_path = argv[2];
-    FILE *fptr = fopen(file_path, 'r');
+    FILE *fptr = fopen(file_path, "r");
+    if (fptr == NULL)
+    {
+        perror("fopen()");
+        return EXIT_FAILURE;
+    }
     for (int i = 0; i < 3; i++)
     {
         char *lineptr = NULL;
@@ -73,30 +78,25 @@ int TCP_Init(int *argc, char ***argv)
         {
             int n = getline(&lineptr, &len, fptr);
             strcpy(RANK_ZERO_IP, lineptr);
-            free(lineptr);
-          //  free(&len);
             printf("%s\n", RANK_ZERO_IP);
         }
         if (i==1)
         {
             int n = getline(&lineptr, &len, fptr);
             strcpy(RANK_ONE_IP, lineptr);
-            free(lineptr);
-           // free(&len);
             printf("%s\n", RANK_ONE_IP);
         }
         if (i==2)
         {
             int n = getline(&lineptr, &len, fptr);
             strcpy(RANK_TWO_IP, lineptr);
-            free(lineptr);
-           // free(&len);
             printf("%s\n", RANK_TWO_IP);
         }
     }
     fclose(fptr);
-        /* init party 0 last */
-    /*if (get_rank() == 0)
+    
+    /* init party 0 last */
+    if (get_rank() == 0)
     {
         TCP_Connect(get_succ());
         TCP_Accept(get_pred());
@@ -107,7 +107,6 @@ int TCP_Init(int *argc, char ***argv)
         TCP_Accept(get_pred());
         TCP_Connect(get_succ());
     }
-    */
 
     return 0;
 }
@@ -208,7 +207,7 @@ int TCP_Send(const void *buf, int count, int dest, int data_size)
     ssize_t n;
     const void *p = buf;
     count = count * data_size;
-    while (count> 0)
+    while (count > 0)
     {
         n = send(get_socket(dest), p, count, 0);
         if (n <= 0)
@@ -224,7 +223,7 @@ int TCP_Recv(void *buf, int count, int source, int data_size)
 {
     ssize_t n;
     const void *p = buf;
-    count =  count * data_size;
+    count = count * data_size;
     while (count > 0)
     {
         n = read(get_socket(source), p, count);
