@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <assert.h>
-
 #include "test-utils.h"
+#include <unistd.h>
 
 #define DEBUG 0
 
 #define SHARE_TAG 193
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
 
   // initialize communication
   init(argc, argv);
@@ -18,42 +19,47 @@ int main(int argc, char** argv) {
 
   BShare xs1[10], xs2[10], xs3[10], ys1[10], ys2[10], ys3[10];
 
-  // if (rank == 0) { //P1
-  //   // Initialize input data and shares
-  //   Data x[10] = {999, -4, 567778, 123556, -754621, 0, 65487, -12885444, 7, 693};
-  //   // First 5 elements are equal to the correspnding x
-  //   Data y[10] = {999, -4, 567778, 123556, -754621, 70, 28922, 45, -45, 0};
+  if (rank == 0)
+  { // P1
+    // Initialize input data and shares
+    Data x[10] = {999, -4, 567778, 123556, -754621, 0, 65487, -12885444, 7, 693};
+    // First 5 elements are equal to the correspnding x
+    Data y[10] = {999, -4, 567778, 123556, -754621, 70, 28922, 45, -45, 0};
 
-  //   init_sharing();
-  //   for (int i=0; i<10; i++) {
-  //       generate_bool_share(x[i], &xs1[i], &xs2[i], &xs3[i]);
-  //       generate_bool_share(y[i], &ys1[i], &ys2[i], &ys3[i]);
-  //   }
-  //   //Send shares to P2
-  //   MPI_Send(&xs2, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&ys2, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&xs3, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&ys3, 10, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   //Send shares to P3
-  //   MPI_Send(&xs3, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&ys3, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&xs1, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&ys1, 10, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  // }
-  // else if (rank == 1) { //P2
-  //   MPI_Recv(&xs1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&ys1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&xs2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&ys2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
-  // else { //P3
-  //   MPI_Recv(&xs1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&ys1, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&xs2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&ys2, 10, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
+    init_sharing();
+    for (int i = 0; i < 10; i++)
+    {
+      generate_bool_share(x[i], &xs1[i], &xs2[i], &xs3[i]);
+      generate_bool_share(y[i], &ys1[i], &ys2[i], &ys3[i]);
+    }
+    // Send shares to P2
+    TCP_Send(&xs2, 10, 1, sizeof(BShare));
+    TCP_Send(&ys2, 10, 1, sizeof(BShare));
+    TCP_Send(&xs3, 10, 1, sizeof(BShare));
+    TCP_Send(&ys3, 10, 1, sizeof(BShare));
+    // Send shares to P3
+    TCP_Send(&xs3, 10, 2, sizeof(BShare));
+    TCP_Send(&ys3, 10, 2, sizeof(BShare));
+    TCP_Send(&xs1, 10, 2, sizeof(BShare));
+    TCP_Send(&ys1, 10, 2, sizeof(BShare));
+  }
+  else if (rank == 1)
+  { // P2
+    TCP_Recv(&xs1, 10, 0, sizeof(BShare));
+    TCP_Recv(&ys1, 10, 0, sizeof(BShare));
+    TCP_Recv(&xs2, 10, 0, sizeof(BShare));
+    TCP_Recv(&ys2, 10, 0, sizeof(BShare));
+  }
+  else
+  { // P3
+    TCP_Recv(&xs1, 10, 0, sizeof(BShare));
+    TCP_Recv(&ys1, 10, 0, sizeof(BShare));
+    TCP_Recv(&xs2, 10, 0, sizeof(BShare));
+    TCP_Recv(&ys2, 10, 0, sizeof(BShare));
+  }
 
-  //exchange seeds
+
+  // exchange seeds
   exchange_rsz_seeds(succ, pred);
 
   // 1. Test element-based equality: x[i] == y[i]
@@ -106,7 +112,6 @@ int main(int argc, char** argv) {
     }
     printf("TEST EQ_B_ARRAY(): OK.\n");
   }
-
 
   // tear down communication
   // MPI_Finalize();

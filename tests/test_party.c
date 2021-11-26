@@ -31,15 +31,23 @@ int main(int argc, char **argv)
         Data r2[ROWS2][COLS2] = {{1, 99}, {3, 99}, {5, 99}, {7, 99}};
 
         init_sharing();
+<<<<<<< HEAD
 
-        printf("Shares: \n");
+     
+=======
+        printf("shares: \n");
+>>>>>>> 3a241d6c992d91b349dce5c7d3065e6c2e35c039
         // generate r1 shares
         for (int i = 0; i < ROWS1; i++)
         {
             for (int j = 0; j < COLS1; j++)
             {
                 generate_bool_share(r1[i][j], &r1s1[i][j], &r1s2[i][j], &r1s3[i][j]);
-                printf("%lld ", r1s2[i][j]);
+<<<<<<< HEAD
+              
+=======
+                printf("%lld", r1s2[i][j]);
+>>>>>>> 3a241d6c992d91b349dce5c7d3065e6c2e35c039
             }
         }
 
@@ -51,17 +59,21 @@ int main(int argc, char **argv)
                 generate_bool_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
             }
         }
-        printf("\n");
+<<<<<<< HEAD
+      
         TCP_Send(&r1s2[0][0], 5 * 2, 1, SHARE_TAG);
+=======
+        TCP_Send(&r1s2[0][0], 5 * 2, 1, 8);
+>>>>>>> 3a241d6c992d91b349dce5c7d3065e6c2e35c039
     }
     else if (rank == 1)
     {
 
-        TCP_Recv(&r1s2[0][0], 5 * 2, 0, SHARE_TAG);
-        TCP_Send(&r1s2[0][0], 5 * 2, 2, SHARE_TAG);
+        TCP_Recv(&r1s2[0][0], 5 * 2, 0, 8);
+        TCP_Send(&r1s2[0][0], 5 * 2, 2, 8);
     }
     else
     {
-        TCP_Recv(&r1s2[0][0], 5 * 2, 1, SHARE_TAG);
+        TCP_Recv(&r1s2[0][0], 5 * 2, 1, 8);
     }
 }

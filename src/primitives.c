@@ -321,8 +321,8 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
       if (((i + 1) % batch_size) == 0)
       {
 
-        TCP_Irecv(&res2[i - (batch_size - 1)], batch_size, get_succ(), XCHANGE_MSG_TAG, &r2);
-        TCP_Isend(&res[i - (batch_size - 1)], batch_size, get_pred(), XCHANGE_MSG_TAG, &r1);
+        TCP_Irecv(&res2[i - (batch_size - 1)], batch_size, get_succ(), sizeof(BShare), &r2);
+        TCP_Isend(&res[i - (batch_size - 1)], batch_size, get_pred(), sizeof(BShare), &r1);
       }
 
       //     // last exchange
@@ -331,8 +331,8 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
 
         TCP_Wait(&r1);
         TCP_Wait(&r2);
-        TCP_Irecv(&res2[len - batch_size], batch_size, get_succ(), XCHANGE_MSG_TAG, &r2);
-        TCP_Isend(&res[len - batch_size], batch_size, get_pred(), XCHANGE_MSG_TAG, &r1);
+        TCP_Irecv(&res2[len - batch_size], batch_size, get_succ(), sizeof(BShare), &r2);
+        TCP_Isend(&res[len - batch_size], batch_size, get_pred(), sizeof(BShare), &r1);
       }
     }
     //   // wait for last exchange before moving on the next level
@@ -387,8 +387,8 @@ void eq_b_array_inter_batch(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long
       //     // except for the final round
       if (l != numlevels - 1)
       {
-        TCP_Irecv(&res2[i], 1, get_succ(), XCHANGE_MSG_TAG, &r2[i]);
-        TCP_Isend(&res[i], 1, get_pred(), XCHANGE_MSG_TAG, &r1[i]);
+        TCP_Irecv(&res2[i], 1, get_succ(), sizeof(BShare), &r2[i]);
+        TCP_Isend(&res[i], 1, get_pred(), sizeof(BShare), &r1[i]);
       }
     }
   }
@@ -1448,8 +1448,8 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
     }
     // distribute shares to P2, P3
 
-    TCP_Isend(z12, len, 1, XCHANGE_MSG_TAG, &r1);
-    TCP_Isend(z13, len, 2, XCHANGE_MSG_TAG, &r2);
+    TCP_Isend(z12, len, 1, sizeof(BShare), &r1);
+    TCP_Isend(z13, len, 2, sizeof(BShare), &r2);
 
     TCP_Wait(&r1);
     TCP_Wait(&r2);
@@ -1458,12 +1458,12 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
     free(z13);
 
     //   // receive share of x3 from P3
-    TCP_Irecv(w1, len, 2, XCHANGE_MSG_TAG, &r1);
+    TCP_Irecv(w1, len, 2, sizeof(BShare), &r1);
     TCP_Wait(&r1);
     //   // generate pairs of random binary shares (R1)
     get_next_rb_pair_array(xb2, xb1, len);
     //   // receive share from P2 and compute xb1
-    TCP_Irecv(r_temp, len, 1, XCHANGE_MSG_TAG, &r1);
+    TCP_Irecv(r_temp, len, 1, sizeof(BShare), &r1);
     TCP_Wait(&r1);
     //   // compute xb1
     for (int i = 0; i < len; i++)
@@ -1479,22 +1479,22 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   else if (get_rank() == 1)
   { // P2
     //   // receive share of x1+x2 frm P1
-    TCP_Irecv(xa1, len, 0, XCHANGE_MSG_TAG, &r1);
+    TCP_Irecv(xa1, len, 0, sizeof(AShare), &r1);
     //   // receive share of x3
-    TCP_Irecv(w1, len, 2, XCHANGE_MSG_TAG, &r2);
+    TCP_Irecv(w1, len, 2, sizeof(BShare), &r2);
 
     TCP_Wait(&r1);
     TCP_Wait(&r2);
     //   // generate pairs of random binary shares (R1)
     get_next_rb_pair_array(xb2, xb1, len);
     //   // send local to P1
-    TCP_Isend(xb2, len, 0, XCHANGE_MSG_TAG, &r1);
+    TCP_Isend(xb2, len, 0, sizeof(BShare), &r1);
     TCP_Wait(&r1);
     //   // xb2 contains the local share of R1
     //   // generate pairs of random binary shares (R2)
     get_next_rb_pair_array(r_temp, xb1, len);
     //   // receive share from P3 and compute xb1
-    TCP_Irecv(r_temp2, len, 2, XCHANGE_MSG_TAG, &r1);
+    TCP_Irecv(r_temp2, len, 2, sizeof(BShare), &r1);
     TCP_Wait(&r1);
     //   // compute xb1
     for (int i = 0; i < len; i++)
@@ -1516,11 +1516,11 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
     }
 
     //   // receive share of x1+x2 frm P1
-    TCP_Irecv(xa1, len, 0, XCHANGE_MSG_TAG, &r1);
+    TCP_Irecv(xa1, len, 0, sizeof(AShare), &r1);
     TCP_Wait(&r1);
     //   // distribute shares to P1, P2
-    TCP_Isend(w13, len, 0, XCHANGE_MSG_TAG, &r1);
-    TCP_Isend(w2, len, 1, XCHANGE_MSG_TAG, &r2);
+    TCP_Isend(w13, len, 0, sizeof(BShare), &r1);
+    TCP_Isend(w2, len, 1, sizeof(BShare), &r2);
 
     TCP_Wait(&r1);
     TCP_Wait(&r2);
@@ -1533,7 +1533,7 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
     //   // generate pairs of random binary shares (R2)
     get_next_rb_pair_array(r_temp, xb1, len);
     //   // send local to P2
-    TCP_Isend(r_temp, len, 1, XCHANGE_MSG_TAG, &r1);
+    TCP_Isend(r_temp, len, 1, sizeof(BShare), &r1);
     TCP_Wait(&r1);
     //   // r_temp contains the local share of R2
   }
@@ -1557,18 +1557,18 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   // reveal y to P3
   if (get_rank() == 0)
   {
-    TCP_Isend(w1, len, 2, XCHANGE_MSG_TAG, &r1);
+    TCP_Isend(w1, len, 2, sizeof(BShare), &r1);
     TCP_Wait(&r1);
   }
   else if (get_rank() == 1)
   { // P2
-    TCP_Isend(w1, len, 2, XCHANGE_MSG_TAG, &r1);
+    TCP_Isend(w1, len, 2, sizeof(BShare), &r1);
     TCP_Wait(&r1);    
   }
   else
   { // P3
-    TCP_Irecv(xb1, len, 0, XCHANGE_MSG_TAG, &r1);
-    TCP_Irecv(xa1, len, 1, XCHANGE_MSG_TAG, &r2);
+    TCP_Irecv(xb1, len, 0, sizeof(BShare), &r1);
+    TCP_Irecv(xa1, len, 1, sizeof(AShare), &r2);
   TCP_Wait(&r1); 
   TCP_Wait(&r2); 
 
