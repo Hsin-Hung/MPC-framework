@@ -79,6 +79,7 @@ int main(int argc, char** argv) {
        TCP_Recv(r1s2, ROWS, 0, sizeof(BShare));
        TCP_Recv(r2s1, ROWS, 0, sizeof(BShare));
        TCP_Recv(r2s2, ROWS, 0, sizeof(BShare));
+       printf("received from rank 0\n");
   }
   else { //P3
        TCP_Recv(r1s1, ROWS, 0, sizeof(BShare));
@@ -154,7 +155,7 @@ int main(int argc, char** argv) {
   gettimeofday(&begin, 0);
 
   eq_b_array(r1s1, r1s2, r2s1, r2s2, ROWS, res_array);
-
+printf("after eq_b_array");
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -165,9 +166,9 @@ int main(int argc, char** argv) {
     printf("ASYNC-ARRAY\t%ld\t%.3f\n", ROWS, elapsed);
   }
 
-  FILE *fptr = fopen("tcp_timing.txt", "w");
+  FILE *fptr = fopen("tcp_timing.txt", "a");
   char buffer[50];
-  sprintf(buffer, "%d", elapsed);
+  sprintf(buffer, "%.3f", elapsed);
   fputs(buffer, fptr);
   fputc('\n', fptr);
   fclose(fptr);

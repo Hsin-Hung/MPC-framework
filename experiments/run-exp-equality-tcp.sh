@@ -1,22 +1,14 @@
 #!/bin/bash
 
-### ### ###                ### ### ###
-
-### ### ### INITIALIZATION ### ### ###
-
-### ### ###                ### ### ###
-
-### paths configuration ###
 TEST="./exp-equality"
-RANK=1
-MAKE="make exp-equality"
+RANK="0"
+FILE="tcp_timing.txt"
+CAT="/bin/cat"
 
-### LOCAL RUN (3 MPI Processes on the same node)
-echo "Making test case"
-$MAKE
-
-for INPUT_SIZE in 1000 10000 100000 1000000 10000000 #100000000
+for INPUT_SIZE in 1024 4096 16384 65536 262144 1048576
 do
-  echo "Running experiment with INPUT_SIZE=$INPUT_SIZE"
-  $TEST $RANK $INPUT_SIZE
+	echo "Running exp-equality for input size = $INPUT_SIZE"
+	$TEST $RANK $INPUT_SIZE
 done
+
+$CAT $FILE

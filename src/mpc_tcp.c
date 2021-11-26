@@ -185,14 +185,6 @@ int TCP_Accept(int source)
         perror("accept");
         exit(EXIT_FAILURE);
     }
-<<<<<<< HEAD
-    uint32_t msg_size;
-    valread = read(new_socket, &msg_size, sizeof(msg_size));
-    msg_size = ntohl(msg_size);
-    printf("msg_size %d\n", msg_size);
-    valread = read(new_socket, buf, msg_size);
-    printf("valread: %d ,buf: %lld\n", valread, buf);
-=======
 
     pred_sock = new_socket;
 }
@@ -241,7 +233,6 @@ int TCP_Recv(void *buf, int count, int source, int data_size)
         count -= n;
     }
 
->>>>>>> 3b7776fa3a114c768a11cde59100442bbebe9941
     return 0;
 }
 
