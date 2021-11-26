@@ -145,9 +145,9 @@ int main(int argc, char** argv) {
   }
 
   
-  */ =======================================================
+  =======================================================
      3. Measure ASYNC array-based equality 
-  ======================================================== 
+  ========================================================*/ 
   BShare *res_array = malloc(ROWS*sizeof(BShare));
 
   // start timer
@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
     printf("ASYNC-ARRAY\t%ld\t%.3f\n", ROWS, elapsed);
   }
 
-  FILE *fptr = fopen("tcp_timing.txt", 'w');
+  FILE *fptr = fopen("tcp_timing.txt", "w");
   char buffer[50];
   sprintf(buffer, "%d", elapsed);
   fputs(buffer, fptr);
