@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TEST="./exp-equality"
-RANK="0"
+RANK="1"
 FILE="tcp_timing.txt"
 CAT="/bin/cat"
 
