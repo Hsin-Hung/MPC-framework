@@ -18,9 +18,9 @@
 //#define RANK_ONE_IP "127.0.0.1"
 //#define RANK_TWO_IP "127.0.0.1"
 
-char RANK_ZERO_IP[15];
-char RANK_ONE_IP[15];
-char RANK_TWO_IP[15];
+//char RANK_ZERO_IP[15];
+//char RANK_ONE_IP[15];
+//char RANK_TWO_IP[15];
 
 int get_socket(int party_rank)
 {
