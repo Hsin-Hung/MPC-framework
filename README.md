@@ -7,6 +7,21 @@ build.
 
 2. Clone the ec528_secrecy repo from github and switch to the replace_MPI branch on all 3 VMs
 
+4. If using VMs on the Mass Open Cloud, you may need to create and add a security group to each VM in order to allow TCP connections on Port 8000 as we have set for our experiment. To do this you must...
+
+    - Go to your MOC Security Groups dashboard
+    - Click the "Create Security Group" 
+    - In the subsequent dialog, give your security group a name and click "Create Security Group"
+    - You will see the new security group in the list of available security groups. Click the "Manage rules" button for that group.
+    - On the next screen, click the "Add rule" button.
+    - Enter 8000 in the "Port" field and click "Add" (you can leave the other fields with their default values)
+    - Once you've added the necessary ports, you're done with this step.
+  To add this new security group to each of the three VMs you are using, you must...
+    - Go to the MOC Instance Dashboard
+    - From the menu at the upper right, select "Edit Security Groups"
+    - Find the security group you created in the previous step listed under "All security groups". Click the "+" button to add it to "Instance security groups".
+    - Click "Save".
+
 4. On all 3 VMs, switch to the src folder and open the mpc_tcp.c file. At the top you will see definitions for RANK_ONE_IP, RANK_TWO_IP, and RANK_THREE_IP, you will need to change those string values to the respective IPs of each of your
 VMs (and these need to be the exact same across all 3 VMs, i.e. RANK_ZERO_IP needs to be the same value in vm0, vm1 and vm2). The IPs should be each VMs respective eth0 ipv4 address when "ifconfig" is run. Our MOC VMs had eth0 IPs that started with 10.0.0. Choose a rank for each VM (0, 1, or 2), and input their respective eth0 IPs with the corresponding
 variable for the IP. It is extremely important to remember which VM you designate as 0, 1, and 2 for later. 
