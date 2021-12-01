@@ -8,6 +8,7 @@
 
 #include "mpctypes.h"
 #include "sharing.h"
+#include "mpc_tcp.h"
 
 /*******************************************************************
 * init_tables: Initializes shares tables and distributes random shares

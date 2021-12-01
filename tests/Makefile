@@ -2,7 +2,7 @@ CC= gcc -std=c99
 CFLAGS= -O3 -Wall -lsodium
 # MPI= mpicc
 SRC=../src
-PRIMITIVES= $(SRC)/comm.c $(SRC)/party.c $(SRC)/primitives.c $(SRC)/sharing.c $(SRC)/utils.c
+PRIMITIVES= $(SRC)/comm.c $(SRC)/party.c $(SRC)/primitives.c $(SRC)/sharing.c $(SRC)/utils.c $(SRC)/mpc_tcp.c
 RELATIONAL= $(SRC)/relational.c
 BASELINE= $(SRC)/baseline.c
 
@@ -122,10 +122,14 @@ test-qcredit:	test_qcredit.c $(PRIMITIVES) $(RELATIONAL) $(BASELINE)
 test-qcredit-baseline:	test_qcredit_baseline.c $(PRIMITIVES) $(RELATIONAL) $(BASELINE)
 			$(CC) $(CFLAGS) -o test-qcredit-baseline test_qcredit_baseline.c $(PRIMITIVES) $(RELATIONAL) $(BASELINE)
 
-
 test-temp:	test-temp.c $(PRIMITIVES)
 			$(CC) $(CFLAGS) -o test-temp test-temp.c $(PRIMITIVES)
 
+test-party:	test_party.c $(PRIMITIVES) $(BASELINE)
+			$(CC) $(CFLAGS) -o test-party test_party.c $(PRIMITIVES) $(BASELINE)
+
+test-async:	test_async.c $(PRIMITIVES) $(BASELINE)
+			$(CC) $(CFLAGS) -o test-async test_async.c $(PRIMITIVES) $(BASELINE)
 
 clean:
-			rm -f test-init test-conn test-tpch-q6 test-conversion test-primitives test-rsz test-share test-select test-rca test-and-all test-equality test-relational test-group test-distinct test-sort test-inequality test-join test-in test-mask test-arithmetic-to-binary test-ageq test-group-join test-group-min-max test-q1 test-q2 test-q3 test-tpch-q4 test-tpch-q4-baseline test-tpch-q13 test-tpch-q13-baseline test-qpwd test-qpwd-baseline test-qcredit test-qcredit-baseline *.o *.exec
+			rm -f test-init test-conn test-tpch-q6 test-conversion test-primitives test-rsz test-share test-select test-rca test-and-all test-equality test-relational test-group test-distinct test-sort test-inequality test-join test-in test-mask test-arithmetic-to-binary test-ageq test-group-join test-group-min-max test-q1 test-q2 test-q3 test-tpch-q4 test-tpch-q4-baseline test-tpch-q13 test-tpch-q13-baseline test-qpwd test-qpwd-baseline test-qcredit test-qcredit-baseline test-party test-async *.o *.exec

@@ -9,6 +9,7 @@
 #include "mpctypes.h"
 #include "party.h"
 #include "utils.h"
+#include "mpc_tcp.h"
 
 
 /*******************************************************************
