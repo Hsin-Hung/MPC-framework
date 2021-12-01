@@ -12,7 +12,7 @@ MPI_data = text_file1.readlines()
 text_file2 = open("tcp_timing.txt", "r")
 TCP_data = text_file2.readlines()
 
-num_elements = [1000, 10000, 100000, 1000000, 10000000]
+num_elements = [1024, 4096, 16384, 65536, 262144, 1048576]
 
 plt.plot(num_elements, MPI_data, color='blue')
 plt.plot(num_elements,TCP_data, color='red')
