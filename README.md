@@ -15,9 +15,6 @@ build.
     - You will see the new security group in the list of available security groups. Click the "Manage rules" button for that group.
     - On the next screen, click the "Add rule" button.
     - Enter 8000 in the "Port" field and click "Add" (you can leave the other fields with their default values)
-
-To add this new security group to each of the three VMs you are using, you must...
-
     - Go to the MOC Instance Dashboard
     - From the menu at the upper right, select "Edit Security Groups"
     - Find the security group you created in the previous step listed under "All security groups". Click the "+" button to add it to "Instance security groups".
