@@ -49,8 +49,11 @@ int TCP_Irecv(void *buf, int count, int source, int data_size, struct TCP_Reques
 // Waits for an MPI send or receive to complete.
 int TCP_Wait(struct TCP_Request *r);
 
-int TCP_Connect(int dest);
+// close all socket
+int TCP_Finalize();
 
+// set up initial MPC parties connections
+int TCP_Connect(int dest);
 int TCP_Accept(int source);
 
 #endif

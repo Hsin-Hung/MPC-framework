@@ -111,6 +111,13 @@ int TCP_Init(int argc, char **argv)
     return 0;
 }
 
+int TCP_Finalize(){
+
+    close(succ_sock);
+    close(pred_sock);
+
+}
+
 int TCP_Connect(int dest)
 {
 
