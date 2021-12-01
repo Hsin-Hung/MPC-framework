@@ -1,3 +1,36 @@
+## Instructions for running exp-equalit to generate Timing Plot
+
+# These are the instructions for running exp-equality #3 with the sockets version of Secrecy
+
+1. On your 3 VMs, ensure that Libsodium is installed correctly. If it is not, the experiment will not 
+build.
+
+2. Clone the ec528_secrecy repo from github and switch to the replace_MPI branch on all 3 VMs
+
+4. On all 3 VMs, switch to the src folder and open the mpc_tcp.c file. At the top you will see definitions for RANK_ONE_IP, RANK_TWO_IP, and RANK_THREE_IP, you will need to change those string values to the respective IPs of each of your
+VMs (and these need to be the exact same across all 3 VMs, i.e. RANK_ZERO_IP needs to be the same value in vm0, vm1 and vm2). The IPs should be each VMs respective eth0 ipv4 address when "ifconfig" is run. Our MOC VMs had eth0 IPs that started with 10.0.0. Choose a rank for each VM (0, 1, or 2), and input their respective eth0 IPs with the corresponding
+variable for the IP. It is extremely important to remember which VM you designate as 0, 1, and 2 for later. 
+
+3. On all 3 VMs, switch to the experiments folder, and run "make exp-equality." This will
+build the experiment, with experiments 1,2, and 4 already commented out (there are a few compiler warnings, but they do
+not affect the behavior of the executable).
+
+4. Once the executable for the experiment is built, remember which VM you designated as rank 2, which VM you designated as rank 3, and which VM you designated as rank 1. This is the order you will have to run the executable. 
+
+5. To run the experiment, run "./exp-equality RANK INPUT_SIZE" on each VM in the order specified in step 4 (i.e., vm1 --> vm2 --> vm0), where RANK is the respective VMs rank as designated in mpc_tcp.c (this is an integer value in [0,1,2]) and INPUT_SIZE is the size of the array for which you wish to run the experiment. The input size needs to be the same across all 3 VMs, but the rank is going to be unique to each VM. Running this in the specified order (vm1, vm2, vm0) will result in a successful run, and produce a text file named "tcp_timing.txt" in the experiment folder in each VM, which measures the latency of the eq_b_array() function in each party.
+
+# Steps to Generate Plot
+
+1. Move the mpi_timing.txt file (in the experiments folder of the secrecy_MPI branch) into the same directory as the tcp_timing.txt file (which is located in the experiments folder of the replace_MPI branch), preferably into a directory not located on the secrecy_MPI branch or the replace_MPI branch. 
+
+2. Move the secrecy_plot.py file located in the master branch of the repo into the same directory as the other 2.
+
+3. Ensure python is installed, along with numpy and matplotlib. These libraries are needed to generate the plot. Ensure all python path variables are configured.
+
+4. Run "python secrecy_plot.py" to generate plot
+
+(Disclaimer, I do not know how to configure my own path variables for python, so I used Google Colab to generate the plot. To generate the plot on colab, simply upload the two text files containing the data, copy and paste the code in secrecy_plot.py into the notebook and run).
+
 ## Building a Secure Communication Layer for Multi-Party Computing - Project Description (UPDATE: 10/18/2021)
 
 ## 1. Visions and Goals of the Project
