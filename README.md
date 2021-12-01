@@ -1,4 +1,4 @@
-## Instructions for running exp-equalit to generate Timing Plot
+## Instructions for running exp-equality to generate Timing Plot
 
 # These are the instructions for running exp-equality #3 with the sockets version of Secrecy
 
@@ -18,6 +18,15 @@ not affect the behavior of the executable).
 4. Once the executable for the experiment is built, remember which VM you designated as rank 2, which VM you designated as rank 3, and which VM you designated as rank 1. This is the order you will have to run the executable. 
 
 5. To run the experiment, run "./exp-equality RANK INPUT_SIZE" on each VM in the order specified in step 4 (i.e., vm1 --> vm2 --> vm0), where RANK is the respective VMs rank as designated in mpc_tcp.c (this is an integer value in [0,1,2]) and INPUT_SIZE is the size of the array for which you wish to run the experiment. The input size needs to be the same across all 3 VMs, but the rank is going to be unique to each VM. Running this in the specified order (vm1, vm2, vm0) will result in a successful run, and produce a text file named "tcp_timing.txt" in the experiment folder in each VM, which measures the latency of the eq_b_array() function in each party.
+
+# Instructions to run exp-equality #3 using the MPI version of Secrecy
+1. Install and configure Libsodium for each VM
+2. Install and configure OpenMPI for each VM
+3. Clone the repository that has the MPI version of Secrecy into each VM (For our repository, this branch is Secrecy-MPI)
+4. CD to the experiments folder of the cloned repository
+5. Create a text document in this folderthat acts as a hostfile that contains the three IP addresses of the parties that will be used. Each line of the hostfile should be constructed as ip-1:1 with the actual IP address replacing ip-1. Also, each party's ip address should be on a separate line in the hostfile.
+6. Access the exp_equality.c file in the experiments folder and comment out the entirety of experiments 1,2,4, and 5 leaving only the ASYNC array-based equality experiment (exp-equality #3)
+7. In the command line, run `mpirun --hostfile <name_of_hostfile> exp-equality <input_size>` using whatever input size you would like to test for. For our experiment, we tested input sizes of 2^10, 2^12, 2^14, 2^16, 2^18, 2^20. The timing for the experiment will be the last output of the experiment. For each test, this time should be documented into a text file that we chose to name mpi_timing.txt. This text file will be used to create the plot comparing the timing between the TCP and MPI implmentations of Secrecy.
 
 # Steps to Generate Plot
 
