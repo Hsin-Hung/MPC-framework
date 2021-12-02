@@ -110,8 +110,8 @@ void exchange_shares_array(const BShare *shares1, BShare *shares2, long length)
 
   // TCP_Wait(&r1);
   // TCP_Wait(&r2);
-      TCP_Send(shares1, length, get_pred(), sizeof(BShare));
-      TCP_Recv(shares2, length, get_succ(), sizeof(BShare));
+  TCP_Send(shares1, length, get_pred(), sizeof(BShare));
+  TCP_Recv(shares2, length, get_succ(), sizeof(BShare));
 }
 
 void exchange_shares_array_u(const unsigned long long *shares1,
@@ -122,24 +122,29 @@ void exchange_shares_array_u(const unsigned long long *shares1,
   // // send s1 to predecessor
   struct TCP_Request r1, r2;
 
-  TCP_Irecv(shares2, length, get_succ(), sizeof(unsigned long long), &r2);
-  TCP_Isend(shares1, length, get_pred(), sizeof(unsigned long long), &r1);
-  // // send s1 to predecessor
+  TCP_Send(shares1, length, get_pred(), sizeof(unsigned long long));
+  TCP_Recv(shares2, length, get_succ(), sizeof(unsigned long long));
 
-  TCP_Wait(&r1);
-  TCP_Wait(&r2);
+  // TCP_Irecv(shares2, length, get_succ(), sizeof(unsigned long long), &r2);
+  // TCP_Isend(shares1, length, get_pred(), sizeof(unsigned long long), &r1);
+  // // // send s1 to predecessor
+
+  // TCP_Wait(&r1);
+  // TCP_Wait(&r2);
 }
 
 void exchange_a_shares_array(const AShare *shares1, AShare *shares2, int length)
 {
   struct TCP_Request r1, r2;
 
-  TCP_Irecv(shares2, length, get_succ(), sizeof(AShare), &r2);
-  TCP_Isend(shares1, length, get_pred(), sizeof(AShare), &r1);
-  // // send s1 to predecessor
+  TCP_Send(shares1, length, get_pred(), sizeof(AShare));
+  TCP_Recv(shares2, length, get_succ(), sizeof(AShare));
+  // TCP_Irecv(shares2, length, get_succ(), sizeof(AShare), &r2);
+  // TCP_Isend(shares1, length, get_pred(), sizeof(AShare), &r1);
+  // // // send s1 to predecessor
 
-  TCP_Wait(&r1);
-  TCP_Wait(&r2);
+  // TCP_Wait(&r1);
+  // TCP_Wait(&r2);
 }
 
 void exchange_bit_shares_array(const BitShare *shares1, BitShare *shares2,
@@ -147,12 +152,15 @@ void exchange_bit_shares_array(const BitShare *shares1, BitShare *shares2,
 {
   struct TCP_Request r1, r2;
 
-  TCP_Irecv(shares2, length, get_succ(), sizeof(BitShare), &r2);
-  TCP_Isend(shares1, length, get_pred(), sizeof(BitShare), &r1);
-  // // send s1 to predecessor
+  TCP_Send(shares1, length, get_pred(), sizeof(BitShare));
+  TCP_Recv(shares2, length, get_succ(), sizeof(BitShare));
 
-  TCP_Wait(&r1);
-  TCP_Wait(&r2);
+  // TCP_Irecv(shares2, length, get_succ(), sizeof(BitShare), &r2);
+  // TCP_Isend(shares1, length, get_pred(), sizeof(BitShare), &r1);
+  // // // send s1 to predecessor
+
+  // TCP_Wait(&r1);
+  // TCP_Wait(&r2);
 }
 
 int get_rank()
@@ -524,14 +532,15 @@ void reveal_b_array_async(BShare *s, int len)
   // // P2, P3 send their shares to P1 and receive the result
   if (rank == 1 || rank == 2)
   {
+    TCP_Send(s, len, 0, sizeof(BShare));
+    TCP_Recv(s, len, 0, sizeof(BShare));
+    // TCP_Isend(s, len, 0, sizeof(BShare), &r1);
+    // TCP_Irecv(s, len, 0, sizeof(BShare), &r2);
 
-    TCP_Isend(s, len, 0, sizeof(BShare), &r1);
-    TCP_Irecv(s, len, 0, sizeof(BShare), &r2);
+    // // // send s1 to predecessor
 
-    // // send s1 to predecessor
-
-    TCP_Wait(&r1);
-    TCP_Wait(&r2);
+    // TCP_Wait(&r1);
+    // TCP_Wait(&r2);
   }
   else if (rank == 0)
   {
@@ -540,10 +549,13 @@ void reveal_b_array_async(BShare *s, int len)
     Data *msg2 = malloc(len * sizeof(Data));
     assert(msg2 != NULL);
     //   // P1 receives shares from P2, P3
-    TCP_Irecv(&msg[0], len, 1, sizeof(Data), &r1);
-    TCP_Irecv(&msg2[0], len, 2, sizeof(Data), &r2);
-    TCP_Wait(&r1);
-    TCP_Wait(&r2);
+    TCP_Recv(&msg[0], len, 1, sizeof(Data));
+    TCP_Recv(&msg2[0], len, 2, sizeof(Data));
+
+    // TCP_Irecv(&msg[0], len, 1, sizeof(Data), &r1);
+    // TCP_Irecv(&msg2[0], len, 2, sizeof(Data), &r2);
+    // TCP_Wait(&r1);
+    // TCP_Wait(&r2);
 
     for (int i = 0; i < len; i++)
     {
@@ -551,11 +563,14 @@ void reveal_b_array_async(BShare *s, int len)
       s[i] ^= msg2[i];
     }
 
-    //   // P1 sends result to P2, P3
-    TCP_Isend(s, len, 1, sizeof(BShare), &r1);
-    TCP_Isend(s, len, 1, sizeof(BShare), &r2);
-    TCP_Wait(&r1);
-    TCP_Wait(&r2);
+    // P1 sends result to P2, P3
+    TCP_Send(s, len, 1, sizeof(BShare));
+    TCP_Send(s, len, 2, sizeof(BShare));
+
+    // TCP_Isend(s, len, 1, sizeof(BShare), &r1);
+    // TCP_Isend(s, len, 2, sizeof(BShare), &r2);
+    // TCP_Wait(&r1);
+    // TCP_Wait(&r2);
     free(msg);
     free(msg2);
   }
