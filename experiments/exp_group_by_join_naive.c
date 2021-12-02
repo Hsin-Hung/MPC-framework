@@ -17,7 +17,7 @@ PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
 
 int main(int argc, char** argv) {
 
-  if (argc < 3) {
+  if (argc < 4) {
     printf("\n\nUsage: %s <NUM_ROWS_1> <NUM_ROWS_2>\n\n", argv[0]);
     return -1;
   }
@@ -25,8 +25,8 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS1 = atol(argv[1]); // input1 size
-  const long ROWS2 = atol(argv[2]); // input2 size
+  const long ROWS1 = atol(argv[2]); // input1 size
+  const long ROWS2 = atol(argv[3]); // input2 size
 
   const int rank = get_rank();
   const int pred = get_pred();
@@ -108,7 +108,6 @@ int main(int argc, char** argv) {
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
-   
   struct timeval begin, end;
   long seconds, micro;
   double elapsed;
@@ -154,7 +153,8 @@ int main(int argc, char** argv) {
 
   // apply group-by-count on join output
   // the results are in join_selected_a
-  group_by_count(&res_table, 0, 1, join_selected, join_selected_a, rb, ra);
+  unsigned key_indices[1] = {0};
+  group_by_count(&res_table, key_indices, 1, join_selected, join_selected_a, rb, ra);
   
   free(join_selected);
   
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
   free(res_table.contents); free(open_res);
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }
 
