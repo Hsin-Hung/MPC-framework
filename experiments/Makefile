@@ -114,4 +114,4 @@ exp-tpch-q6-baseline:	exp_tpch_q6_baseline.c $(PRIMITIVES) $(RELATIONAL) $(BASEL
 			$(CC) $(CFLAGS) -o exp-tpch-q6-baseline exp_tpch_q6_baseline.c $(PRIMITIVES) $(RELATIONAL) $(BASELINE)
 
 clean:
-			rm -f exp-equality exp-cmp-swap exp-exchange exp-reveal exp-greater exp-rca exp-distinct exp-join exp-semi-join exp-order-by exp-group-by exp-q1 exp-q2 exp-q3 exp-tpch-q4 exp-tpch-q4-baseline exp-tpch-q13 exp-tpch-q13-baseline exp-qpwd exp-qpwd-baseline exp-qcredit exp-qcredit-baseline *.o *.exec
+			rm -f exp-equality exp-cmp-swap exp-exchange exp-reveal exp-greater exp-rca exp-distinct exp-join exp-semi-join exp-order-by exp-group-by exp-q1 exp-q2 exp-q3 exp-tpch-q4 exp-tpch-q4-baseline exp-tpch-q13 exp-tpch-q13-baseline exp-qpwd exp-qpwd-baseline exp-qcredit exp-qcredit-baseline exp-group-by-join-naive *.o *.exec
