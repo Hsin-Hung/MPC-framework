@@ -1,5 +1,5 @@
 CC= gcc -std=c99
-CFLAGS= -O3 -Wall -lsodium
+CFLAGS= -O3 -Wall -lsodium -lm
 # MPI= mpicc
 SRC=../src
 PRIMITIVES= $(SRC)/comm.c $(SRC)/primitives.c $(SRC)/mpc_tcp.c $(SRC)/utils.c $(SRC)/party.c $(SRC)/sharing.c
