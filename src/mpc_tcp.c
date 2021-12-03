@@ -12,7 +12,7 @@
 
 #define RANK_ZERO_IP "10.0.0.91"
 #define RANK_ONE_IP "10.0.0.67"
-#define RANK_TWO_IP "10.0.0.179"
+#define RANK_TWO_IP "10.0.0.23"
 
 // #define RANK_ZERO_IP "127.0.0.1"
 // #define RANK_ONE_IP "127.0.0.1"
