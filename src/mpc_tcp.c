@@ -10,13 +10,13 @@
 #include "mpc_tcp.h"
 #include "comm.h"
 
-// #define RANK_ZERO_IP "10.0.0.91"
-// #define RANK_ONE_IP "10.0.0.67"
-// #define RANK_TWO_IP "10.0.0.179"
+#define RANK_ZERO_IP "10.0.0.91"
+#define RANK_ONE_IP "10.0.0.67"
+#define RANK_TWO_IP "10.0.0.179"
 
-#define RANK_ZERO_IP "127.0.0.1"
-#define RANK_ONE_IP "127.0.0.1"
-#define RANK_TWO_IP "127.0.0.1"
+// #define RANK_ZERO_IP "127.0.0.1"
+// #define RANK_ONE_IP "127.0.0.1"
+// #define RANK_TWO_IP "127.0.0.1"
 
 //char RANK_ZERO_IP[15];
 //char RANK_ONE_IP[15];
@@ -130,7 +130,7 @@ int TCP_Connect(int dest)
     }
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT + dest);
+    serv_addr.sin_port = htons(PORT);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, get_address(dest), &serv_addr.sin_addr) <= 0)
@@ -172,7 +172,7 @@ int TCP_Accept(int source)
     }
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT + get_rank());
+    address.sin_port = htons(PORT);
 
     // Forcefully attaching socket to the port 8080
     if (bind(server_fd, (struct sockaddr *)&address,
