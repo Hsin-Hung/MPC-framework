@@ -53,7 +53,7 @@ not affect the behavior of the executable).
 
 (Disclaimer, I do not know how to configure my own path variables for python, so I used Google Colab to generate the plot. To generate the plot on colab, simply upload the two text files containing the data, copy and paste the code in secrecy_plot.py into the notebook and run).
 
-## Building a Secure Communication Layer for Multi-Party Computing - Project Description (UPDATE: 10/18/2021)
+## Building a Secure Communication Layer for Multi-Party Computing - Project Description
 
 ## 1. Visions and Goals of the Project
 
