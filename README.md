@@ -75,15 +75,18 @@ This project does not target those outside parties (data owner and data learner)
 ## 3. Scope and Features of the Project
 
 - Remove dependencies on MPI
-    - Replace MPI init with a sockets init function
+    - Replace MPI init with a TCP init function
+       - Calls on TCPConnect and TCPAccept functions where sockets between parties are established
     - Establish TCP connections between parties involved and orchestration mechanism
     - Asynchronous Communication
        - TCP is intrinsically asynchronous
     - Maintain proper function of all other aspects of current Secrecy framework
+       - Utilized binary equality and group by join experiments to verify proper implementation 
 
 - Orchestration
     - Implement way to orchestrate party IP addresses for TCP
     - Master Orchestrator: spawns processes/waits for parties to contact it to pass IP addresses to other parties
+    - Creates a text file that is passed to all parties that are used in TCP_Init
 
 - TCP
     - Network communication protocol that uses IP addresses and port number for routing
@@ -102,7 +105,7 @@ This project does not target those outside parties (data owner and data learner)
     - Report performance improvements when using UKL (if any)
 
 - Unikernel
-    - Our understanding is that we aren't going to worry about the UKL until after we have a functioning MPI solution, and then PhD students from Professor Krieger's group will help us run Secrecy on UKL.
+    - With help from other UKL teams, we currently have one instance of Secrecy running on the Unikernel as a proof of concept. Without personal knowledge of how to run programs on the UKL, the addition and connection of all three parties of Secrecy will need to be carried out by those more familiar with UKL.
 
 ## 4. Solution Concept
 **Global Architectural Structure of the Project**
@@ -112,13 +115,13 @@ Crucial project components and definitions:
   - Party: One of three web services used during the data transfer process. The "hub" where messages are sent or received.
   - Web: Cloud providers that provide machines were secure computations on supplied data are taking place.
   - Multi Party Communication (MPC): Communication between three cloud services to ensure secure data transmission and evaluation
-  - Secrecy: Application used to securely analyze private data
+  - Secrecy: Application used to execute secure relational analytics according to a cryptographic MPC protocol
   - Master Orchestrator: entity that receives IP addresses of parties and passes them to other parties to establish socket connections and open TCP flow
 ![image](https://user-images.githubusercontent.com/61120367/134678604-cf5f5657-4c49-4310-be77-839b6323eb1e.png)
 
 _**Figure 2: Architecture of the MPC. Black components currently in use, blue components to be implemented.**_
 
-Figure 2 demonstrates the current structure of the MPC, and the structure to be implemented. Currently, MPI is used to enable communication between parties. During certain points of program execution, parties have to verify information with each other. In the current MPC implementation, parties can only communicate along the Main Thread one message at a time. In order to establish a non-blocking method of asynchronous verification, a Communication Thread (seen in blue) will replace MPI. Using TCP communication, input and output buffers will allow for the non-blocking transfer of data. Later, the data will be processed asynchronously to provide verification for each party. 
+Figure 2 demonstrates the current structure of the MPC, and the structure to be implemented. MPI was used to enable communication between parties. During certain points of program execution, parties have to verify information with each other. In the current MPC implementation, parties can only communicate along the Main Thread one message at a time. In order to establish a non-blocking method of asynchronous verification, a Communication Thread (seen in blue) will replace MPI. Using TCP communication, input and output buffers will allow for the non-blocking transfer of data. Later, the data will be processed asynchronously to provide verification for each party. 
 
 **Design Implications and Discussion**
 
@@ -126,6 +129,8 @@ Key Design Decisions and Implementations:
   - MPI Elimination: MPI was first deployed as a temporary solution. In order to deploy Secrecy for MPC, remove unnecessary software depenencies and run on UKL, MPI needs to be replaced.
       - This will be done by implementing TCP connections between parties
   - Addition of a Communication Thread: When two parties want to exchange messages through the main thread, it blocks all the main thread operations or computations. By dedicating parties communication tasks to additional threads, the parties will be able to pull from a communication thread buffer, instead of the main thread, which eliminates the block. In order to implement multithreading, we will be using pthreads allowing our group to maintain high speed communication without the MPI (currently not the focus of the project, will come up later during optimization).
+  - MOC Testing of TCP Implementation: Using the Mass Open Cloud, we were able to simulate three separate parties that would be used in Secrecy. With limited prior knowledge on the MOC and how to properly create instances, there were some modifications that we needed to make to allow our TCP version to run properly. We had arbitarily decided that port 8000 would be used when initializing the sockets in our send and receive functions, however, we did not realize that this port was not configured on MOC instances. By properly setting security groups within each VM to allow for connections on Port 8000, we were able to move past this roadblock and begin testing on the MOC.
+  - Persistent Initialization of Sockets: Rather than creating a new socket and connecting and accepting to that new initialization for each message, we initialized a socket between each party when Secrecy is started. From there, we are able to use those sockets to send and receive messages throughout the entirety of an experiment. This reduces overhead and allows for faster communication between each party involved in the computation.
   - Implementation of Buffers: When two parties want to exchange messages, they cannot do so asynchronously. As such, only one message can be processed at a time. With the addition of input and output buffers, parties will be able to send and pull messages without being in sync (Also part of optimization, for a later sprint).
   - Unikernel Implementation: After verifying functionality of the MPI-free system, MPC will run on top of a Unikernel. The stripped down implementation will further speed up MPC implementation. 
 
@@ -158,16 +163,15 @@ Release #3:
 
 Release #4:
 
-  - Test  to ensure implementation functions without MPI
-  - Begin deployment on UKL
-  - Test on UKL
+  - Integrate TCP send/receive functions into Secrecy codebase
+  - Create test case to determine if TCP outputs match MPI outputs
 
 
 Release #5:
 
-  - Optimize using pthreads (communication thread & buffers)
-  - Final testing
-  - Deployment of solution and optimization on UKL
+  - Usage of a complex operator to provide an end to end test case
+  - Perform performance testing of MPI vs. TCP implementations
+  - Deployment of an instance on UKL and testing with QEMU
 
 ## DEMO 1
 
