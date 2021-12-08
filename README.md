@@ -52,7 +52,6 @@ This project does not target those outside parties (data owner and data learner)
 - Unikernel
     - With help from other UKL teams, we currently have one instance of Secrecy running on the Unikernel as a proof of concept. Without personal knowledge of how to run programs on the UKL, the addition and connection of all three parties of Secrecy will need to be carried out by those more familiar with UKL.
 
-
 ## 4. Solution Concept
 **Global Architectural Structure of the Project**
 
@@ -271,6 +270,11 @@ not affect the behavior of the executable).
 2.  On all 3 VMs, switch to the experiments folder, and run "make exp-group-by-join-naive" to build the experiment.
 3.  To run the experiment, run "./exp-group-by-join-naive RANK NUM_ROWS_1 NUM_ROWS_2" on each VM in the order vm1 --> vm2 --> vm0, where RANK is the respective VMs rank as designated in mpc_tcp.c (this is an integer value in [0,1,2]) and NUM_ROWS is the size of the table for which you wish to run the experiment, which has the be a power of 2. The NUM_ROWS needs to be the same across all 3 VMs, but the rank is going to be unique to each VM. Running this in the specified order (vm1, vm2, vm0) will result in a successful run and prints the measurement of the latency of the experiment.
 
-## Instructions on how to run secrecy on the UKL in qemu
-
-![alt text](https://github.com/jliagouris/ec528_secrecy/blob/master/Compiling%20Secrecy%20on%20UKL.pdf)
+# Instructions for running orchestrator to fetch party IP addresses
+1.  With 4 VMs on the MOC, designate one as the orchestrator, and 3 as the MPC parties
+2.  Clone this repository onto all 4 VMs, and enable security groups for all 4 VMs to allow TCP communication via port 8000
+3.  On the 3 MPC VMs, in the ipClient.c file located in the orchestrator directory, change the target IP address of the ipaddr structure in the connect() system call to the IP address of the orchestrator VM. 
+4.  Once the ipClient.c files have been configured to connect to the IP of the orchestrator, compile the executable on all 3 VMs in the orchestrator directory with "gcc -std=c99 ipClient.c -o client", and compile the executable on the 4th orchestrator VM in the orchestrator directory with "gcc -std=c99 ipFetch.c -o fetch"
+5.  On the orchestrator VM, run "./fetch" in the current directory
+6.  On the 3 MPC VMs, run "./client" in the current directory
+7.  In the orchestrator directory of all 3 MPC VMs, you should now see a ipAddress.txt file containing 3 lines with an IP address on each line
