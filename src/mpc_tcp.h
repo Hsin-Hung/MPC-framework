@@ -28,6 +28,10 @@ char *get_address(int rank);
 // args: the number of parties, assume we have mapping between rank -> ip:port
 int TCP_Init(int argc, char **argv);
 
+// set up initial MPC parties connections
+int TCP_Connect(int dest);
+int TCP_Accept(int source);
+
 /* assign a rank for this party */
 int TCP_Comm_rank(int *rank);
 
@@ -51,9 +55,5 @@ int TCP_Wait(struct TCP_Request *r);
 
 // close all socket
 int TCP_Finalize();
-
-// set up initial MPC parties connections
-int TCP_Connect(int dest);
-int TCP_Accept(int source);
 
 #endif
