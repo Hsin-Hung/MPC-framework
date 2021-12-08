@@ -273,12 +273,9 @@ not affect the behavior of the executable).
 # Instructions for running orchestrator to fetch party IP addresses
 1.  With 4 VMs on the MOC, designate one as the orchestrator, and 3 as the MPC parties
 2.  Clone this repository onto all 4 VMs, and enable security groups for all 4 VMs to allow TCP communication via port 8000
-3.  On the 3 MPC VMs, in the ipClient.c file located in the orchestrator directory, change the target IP address of the ipaddr structure in the connect() system call to the IP address of the orchestrator VM. 
-4.  Once the ipClient.c files have been configured to connect to the IP of the orchestrator, compile the executable on all 3 VMs in the orchestrator directory with "gcc -std=c99 ipClient.c -o client", and compile the executable on the 4th orchestrator VM in the orchestrator directory with "gcc -std=c99 ipFetch.c -o fetch"
-5.  On the orchestrator VM, run "./fetch" in the current directory
-6.  On the 3 MPC VMs, run "./client" in the current directory
-7.  In the orchestrator directory of all 3 MPC VMs, you should now see a ipAddress.txt file containing 3 lines with an IP address on each line
-
-## Instructions on how to run secrecy on the UKL in QEMU
-
-[embed]https://github.com/jliagouris/ec528_secrecy/blob/master/Compiling%20Secrecy%20on%20UKL.pdf[/embed]
+3.  On the designated orchestrator party, run ifconfig and remember the ip address in the eth0 section (for our VMs it started with 10.0.0), this is needed for step 4.
+4.  On the 3 MPC VMs, in the ipClient.c file located in the orchestrator directory, change the target IP address of the ipaddr structure in the connect() system call to the IP address of the orchestrator VM. 
+5.  Once the ipClient.c files have been configured to connect to the IP of the orchestrator, compile the executable on all 3 VMs in the orchestrator directory with "gcc -std=c99 ipClient.c -o client", and compile the executable on the 4th orchestrator VM in the orchestrator directory with "gcc -std=c99 ipFetch.c -o fetch"
+6.  On the orchestrator VM, run "./fetch" in the current directory
+7.  On the 3 MPC VMs, run "./client" in the current directory
+8.  In the orchestrator directory of all 3 MPC VMs, you should now see a ipAddress.txt file containing 3 lines with an IP address on each line
