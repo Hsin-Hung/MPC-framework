@@ -1,8 +1,3 @@
-
-# Instructions to run exp_group_by_join_naive with the socket version of Secrecy
-1.  Follow the instruction 1-4 for the instructions for running exp-equality #3 with the sockets version of Secrecy.
-2.  On all 3 VMs, switch to the experiments folder, and run "make exp-group-by-join-naive" to build the experiment.
-3.  To run the experiment, run "./exp-group-by-join-naive RANK NUM_ROWS_1 NUM_ROWS_2" on each VM in the order vm1 --> vm2 --> vm0, where RANK is the respective VMs rank as designated in mpc_tcp.c (this is an integer value in [0,1,2]) and NUM_ROWS is the size of the table for which you wish to run the experiment, which has the be a power of 2. The NUM_ROWS needs to be the same across all 3 VMs, but the rank is going to be unique to each VM. Running this in the specified order (vm1, vm2, vm0) will result in a successful run and prints the measurement of the latency of the experiment.
 ## Building a Secure Communication Layer for Multi-Party Computing - Project Description
 
 ## 1. Visions and Goals of the Project
