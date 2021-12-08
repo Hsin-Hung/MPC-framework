@@ -62,7 +62,7 @@ Our communication layer will replace Message Passing Interface (MPI), the messag
   - Eliminate MPI dependency in Secrecy and establish standing TCP connections
   - Run our Secrecy prototype on a Linux Unikernel (UKL)
 
-MPI is very effective for HPC, which happens on a single cluster. However, since MPC parties are not necessarily located in the same place, an communication protocol that uses the internet (i.e. TCP) is needed. Additionally, Secrecy is meant to eventually be deployed on a Unikernel, which MPI is not compatible with.
+MPI is very effective for High Performance Computing on a single cluster. However, since MPC parties are not necessarily located in the same place, a communication protocol that uses the internet (i.e. TCP) is needed. Additionally, Secrecy is meant to eventually be deployed on a Unikernel, which MPI is not compatible with.
 
 ## 2. Users and Personas of the Project
 
@@ -131,7 +131,6 @@ Key Design Decisions and Implementations:
   - Addition of a Communication Thread: When two parties want to exchange messages through the main thread, it blocks all the main thread operations or computations. By dedicating parties communication tasks to additional threads, the parties will be able to pull from a communication thread buffer, instead of the main thread, which eliminates the block. In order to implement multithreading, we will be using pthreads allowing our group to maintain high speed communication without the MPI (currently not the focus of the project, will come up later during optimization).
   - MOC Testing of TCP Implementation: Using the Mass Open Cloud, we were able to simulate three separate parties that would be used in Secrecy. With limited prior knowledge on the MOC and how to properly create instances, there were some modifications that we needed to make to allow our TCP version to run properly. We had arbitarily decided that port 8000 would be used when initializing the sockets in our send and receive functions, however, we did not realize that this port was not configured on MOC instances. By properly setting security groups within each VM to allow for connections on Port 8000, we were able to move past this roadblock and begin testing on the MOC.
   - Persistent Initialization of Sockets: Rather than creating a new socket and connecting and accepting to that new initialization for each message, we initialized a socket between each party when Secrecy is started. From there, we are able to use those sockets to send and receive messages throughout the entirety of an experiment. This reduces overhead and allows for faster communication between each party involved in the computation.
-  - Implementation of Buffers: When two parties want to exchange messages, they cannot do so asynchronously. As such, only one message can be processed at a time. With the addition of input and output buffers, parties will be able to send and pull messages without being in sync (Also part of optimization, for a later sprint).
   - Unikernel Implementation: After verifying functionality of the MPI-free system, MPC will run on top of a Unikernel. The stripped down implementation will further speed up MPC implementation. 
 
 
