@@ -279,3 +279,7 @@ not affect the behavior of the executable).
 6.  On the orchestrator VM, run "./fetch" in the current directory
 7.  On the 3 MPC VMs, run "./client" in the current directory
 8.  In the orchestrator directory of all 3 MPC VMs, you should now see a ipAddress.txt file containing 3 lines with an IP address on each line
+
+# Instructions for running secrecy on the UKL in qemu
+
+[embed]https://github.com/jliagouris/ec528_secrecy/blob/master/Compiling%20Secrecy%20on%20UKL.pdf[/embed]
