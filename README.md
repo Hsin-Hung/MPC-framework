@@ -52,6 +52,8 @@ This project does not target those outside parties (data owner and data learner)
 - Unikernel
     - With help from other UKL teams, we currently have one instance of Secrecy running on the Unikernel as a proof of concept. Without personal knowledge of how to run programs on the UKL, the addition and connection of all three parties of Secrecy will need to be carried out by those more familiar with UKL.
 
+![image](https://github.com/jliagouris/ec528_secrecy/blob/master/Compiling%20Secrecy%20on%20UKL.pdf)
+
 ## 4. Solution Concept
 **Global Architectural Structure of the Project**
 
