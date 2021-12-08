@@ -282,4 +282,4 @@ not affect the behavior of the executable).
 
 # Instructions for running secrecy on the UKL in qemu
 
-Format: ![Alt Text](https://github.com/jliagouris/ec528_secrecy/blob/master/Compiling%20Secrecy%20on%20UKL.pdf)
+![PDF](https://github.com/jliagouris/ec528_secrecy/blob/master/Compiling%20Secrecy%20on%20UKL.pdf)
