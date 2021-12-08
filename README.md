@@ -208,9 +208,9 @@ To build and run SysX on linux, edit the provided `Makefile` as follows:
 
     `exp-equality:   exp_equality.c $(PRIMITIVES) $(MPI) $(CFLAGS) -o exp-equality exp_equality.c $(PRIMITIVES) $(DEP)`
     
-## Instructions for running exp-equality to generate Timing Plot
+# Instructions for running exp-equality to generate Timing Plot
 
-# These are the instructions for running exp-equality #3 with the sockets version of Secrecy
+## These are the instructions for running exp-equality #3 with the sockets version of Secrecy
 
 1. On your 3 VMs, ensure that Libsodium is installed correctly. If it is not, the experiment will not 
 build.
@@ -242,7 +242,7 @@ not affect the behavior of the executable).
 
 7. To run the experiment, run "./exp-equality RANK INPUT_SIZE" on each VM in the order specified in step 4 (i.e., vm1 --> vm2 --> vm0), where RANK is the respective VMs rank as designated in mpc_tcp.c (this is an integer value in [0,1,2]) and INPUT_SIZE is the size of the array for which you wish to run the experiment. The input size needs to be the same across all 3 VMs, but the rank is going to be unique to each VM. Running this in the specified order (vm1, vm2, vm0) will result in a successful run, and produce a text file named "tcp_timing.txt" in the experiment folder in each VM, which measures the latency of the eq_b_array() function in each party.
 
-# Instructions to run exp-equality #3 using the MPI version of Secrecy
+## Instructions to run exp-equality #3 using the MPI version of Secrecy
 1. Install and configure Libsodium for each VM
 2. Install and configure OpenMPI for each VM
 3. Clone the repository that has the MPI version of Secrecy into each VM (For our repository, this branch is Secrecy-MPI)
@@ -251,7 +251,7 @@ not affect the behavior of the executable).
 6. Access the exp_equality.c file in the experiments folder and comment out the entirety of experiments 1,2,4, and 5 leaving only the ASYNC array-based equality experiment (exp-equality #3)
 7. In the command line, run `mpirun --hostfile <name_of_hostfile> exp-equality <input_size>` using whatever input size you would like to test for. For our experiment, we tested input sizes of 2^10, 2^12, 2^14, 2^16, 2^18, 2^20. The timing for the experiment will be the last output of the experiment. For each test, this time should be documented into a text file that we chose to name mpi_timing.txt. This text file will be used to create the plot comparing the timing between the TCP and MPI implmentations of Secrecy.
 
-# Steps to Generate Plot
+## Steps to Generate Plot
 
 1. Move the mpi_timing.txt file (in the experiments folder of the secrecy_MPI branch) into the same directory as the tcp_timing.txt file (which is located in the experiments folder of the replace_MPI branch), preferably into a directory not located on the secrecy_MPI branch or the replace_MPI branch. 
 
@@ -263,8 +263,9 @@ not affect the behavior of the executable).
 
 (Disclaimer, I do not know how to configure my own path variables for python, so I used Google Colab to generate the plot. To generate the plot on colab, simply upload the two text files containing the data, copy and paste the code in secrecy_plot.py into the notebook and run).
 
-## Instructions for running complex operator to test TCP functionality
-# Instructions to run exp_group_by_join_naive with the socket version of Secrecy
+# Instructions for running complex operator to test TCP functionality
+
+## Instructions to run exp_group_by_join_naive with the socket version of Secrecy
 1.  Follow the instruction 1-4 for the instructions for running exp-equality #3 with the sockets version of Secrecy.
 2.  On all 3 VMs, switch to the experiments folder, and run "make exp-group-by-join-naive" to build the experiment.
 3.  To run the experiment, run "./exp-group-by-join-naive RANK NUM_ROWS_1 NUM_ROWS_2" on each VM in the order vm1 --> vm2 --> vm0, where RANK is the respective VMs rank as designated in mpc_tcp.c (this is an integer value in [0,1,2]) and NUM_ROWS is the size of the table for which you wish to run the experiment, which has the be a power of 2. The NUM_ROWS needs to be the same across all 3 VMs, but the rank is going to be unique to each VM. Running this in the specified order (vm1, vm2, vm0) will result in a successful run and prints the measurement of the latency of the experiment.
