@@ -6,7 +6,6 @@
 
 #define DEBUG 1
 #define SHARE_TAG 193
-#define PRIVATE static
 #define COLS_C 3
 #define COLS_O 5
 #define C 42

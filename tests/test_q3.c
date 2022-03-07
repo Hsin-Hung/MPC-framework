@@ -6,7 +6,6 @@
 
 #define DEBUG 0
 #define SHARE_TAG 193
-#define PRIVATE static
 #define COLS 6  // Three 'original' columns plus two more columns for 'c-a' and
                 // 'a-c' shares, and one more column for predicate evaluation
 

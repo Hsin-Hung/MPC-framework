@@ -3,15 +3,13 @@
 #include <sodium.h>
 #include "mpctypes.h"
 
-#define PRIVATE static
-
 #define RAND_STATE_SIZE 128
 #define MSG_TAG 42
 
 Seed seed_local = 0, seed_remote = 0;
 char local_state[RAND_STATE_SIZE], remote_state[RAND_STATE_SIZE];
 
-PRIVATE void check_init_seeds(const char*);
+static void check_init_seeds(const char*);
 
 int exchange_rsz_seeds(int succ_rank, int pred_rank) {
 
@@ -99,7 +97,7 @@ void get_next_rb_array(BShare *rnum, int len) {
 }
 
 // check if seeds have been initialized
-PRIVATE void check_init_seeds(const char* f) {
+static void check_init_seeds(const char* f) {
     if (seed_local == 0 || seed_remote == 0) {
         fprintf(stderr, "ERROR: exchange_rsz_seeds() must be called before %s\n", f);
         exit(EXIT_FAILURE);

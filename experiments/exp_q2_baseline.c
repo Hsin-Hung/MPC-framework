@@ -6,17 +6,16 @@
 
 #define DEBUG 0
 #define SHARE_TAG 193
-#define PRIVATE static
 #define COLS 6  // pid, time, time+15, time+56, diag-cdiff, cdiff-diag
 
-PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
+static void materialized_join(BShareTable *input1, BShareTable *input2,
                         int leftcol, int rightcol, BShareTable* result);
-PRIVATE void materialized_join_geq(BShareTable *input1, BShareTable *input2,
+static void materialized_join_geq(BShareTable *input1, BShareTable *input2,
                         int leftcol, int rightcol, BShare* result);
-PRIVATE unsigned long long geq_round_a(BShare, BShare, BShare, BShare, int);
-PRIVATE unsigned long long gr_round_b(BShare, BShare, BShare, BShare, int,
+static unsigned long long geq_round_a(BShare, BShare, BShare, BShare, int);
+static unsigned long long gr_round_b(BShare, BShare, BShare, BShare, int,
                                       char local[], char remote[]);
-PRIVATE unsigned long long gr_round_c_char(int, int, int, char local[], char remote[],
+static unsigned long long gr_round_c_char(int, int, int, char local[], char remote[],
                                       char levels[], int *bit_count);
 
 /**
@@ -229,7 +228,7 @@ int main(int argc, char** argv) {
 // The result is stored in a new BShareTable whose first columns contain
 // the matching pairs of the original tables and
 // the last 2 columns contain the join result bits.
-PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
+static void materialized_join(BShareTable *input1, BShareTable *input2,
                         int leftcol, int rightcol, BShareTable* result) {
 
   int numbits = sizeof(BShare) * 8;
@@ -274,7 +273,7 @@ PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
 
 
 // inequality join
-PRIVATE void materialized_join_geq(BShareTable *input1, BShareTable *input2,
+static void materialized_join_geq(BShareTable *input1, BShareTable *input2,
                         int leftcol, int rightcol, BShare* result) {
 
   BShare** c1 = input1->contents;
@@ -401,7 +400,7 @@ PRIVATE void materialized_join_geq(BShareTable *input1, BShareTable *input2,
   free(local); free(remote);
 }
 
-PRIVATE unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length) {
+static unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length) {
   // Compute (x_i ^ y_i)
   BShare xor1 = x1 ^ y1;
   BShare xor2 = x2 ^ y2;
@@ -437,7 +436,7 @@ PRIVATE unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y
 
 // B. Compute next to last AND at odd levels as well as 1st round of pairwise
 // ANDs at the last level. This step performs 'length' logical ANDs in total.
-PRIVATE unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2,
+static unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2,
                                       int length, char local[], char remote[]) {
   // Compute ~(x_i ^ y_i)
   BShare not_xor1 = ~(x1^y1);
@@ -472,7 +471,7 @@ PRIVATE unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2
   return local_bits;
 }
 
-PRIVATE unsigned long long gr_round_c_char(int i, int bits_left, int length, char local[], char remote[],
+static unsigned long long gr_round_c_char(int i, int bits_left, int length, char local[], char remote[],
                                       char levels[], int *bit_count) {
 
   int current_level, num_levels;

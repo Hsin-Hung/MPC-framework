@@ -6,7 +6,6 @@
 
 #define DEBUG 0
 #define SHARE_TAG 193
-#define PRIVATE static
 #define COLS 6  // pid, time, time+15, time+56, diag-cdiff, cdiff-diag
 
 /**

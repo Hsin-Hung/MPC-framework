@@ -6,7 +6,6 @@
 
 #define DEBUG 0
 #define SHARE_TAG 193
-#define PRIVATE static
 #define COLS_L 5
 #define D1 1994
 #define D2 1996

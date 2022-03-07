@@ -5,7 +5,6 @@
 #include "exp-utils.h"
 
 #define SHARE_TAG 193
-#define PRIVATE static
 
 /**
  * Evaluates the performance of ORDER-BY (bitonic sort).

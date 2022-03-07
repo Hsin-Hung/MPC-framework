@@ -5,10 +5,9 @@
 #include "exp-utils.h"
 
 #define SHARE_TAG 193
-#define PRIVATE static
 #define COLS 2
 
-PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
+static void materialized_join(BShareTable *input1, BShareTable *input2,
                         int leftcol, int rightcol, BShareTable* result);
 
 /**
@@ -186,7 +185,7 @@ int main(int argc, char** argv) {
 // The result is stored in a new BShareTable whose first columns contain
 // the matching pairs of the original tables and
 // the last 2 columns contain the join result bits.
-PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
+static void materialized_join(BShareTable *input1, BShareTable *input2,
                         int leftcol, int rightcol, BShareTable* result) {
 
   int numbits = sizeof(BShare) * 8;

@@ -8,8 +8,6 @@
 
 #define SA struct sockaddr
 
-#define PRIVATE static
-
 #define NUM_PARTIES 3
 #define XCHANGE_MSG_TAG 7
 #define OPEN_MSG_TAG 777
@@ -17,7 +15,7 @@
 int rank = 0, num_parties = 3;
 int initialized = 0;
 
-PRIVATE void check_init(const char *f);
+static void check_init(const char *f);
 
 // initialize MPI, rank, num_parties
 void init(int argc, char **argv)
@@ -580,8 +578,8 @@ void reveal_b_array_async(BShare *s, int len)
   }
 }
 
-// check if MPI has been initialized
-PRIVATE void check_init(const char *f)
+// check if communication has been initialized
+static void check_init(const char *f)
 {
   if (!initialized)
   {

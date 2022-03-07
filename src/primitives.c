@@ -1,25 +1,24 @@
 #include "primitives.h"
 #include "utils.h"
 
-#define PRIVATE static
 #define XCHANGE_MSG_TAG 7
 
-PRIVATE BShare eq_b_level(int, BShare, BShare);
-// PRIVATE BShare eq_b_level2(int numbits, BShare z1, BShare z2);
-PRIVATE unsigned long long gr_round_a(BShare, BShare, BShare, BShare, int);
-PRIVATE unsigned long long geq_round_a(BShare, BShare, BShare, BShare, int);
-PRIVATE unsigned long long gr_round_b(BShare, BShare, BShare, BShare, int,
+static BShare eq_b_level(int, BShare, BShare);
+// static BShare eq_b_level2(int numbits, BShare z1, BShare z2);
+static unsigned long long gr_round_a(BShare, BShare, BShare, BShare, int);
+static unsigned long long geq_round_a(BShare, BShare, BShare, BShare, int);
+static unsigned long long gr_round_b(BShare, BShare, BShare, BShare, int,
                                       char local[], char remote[]);
-PRIVATE unsigned long long gr_round_c(int, int, int, char local[], char remote[],
+static unsigned long long gr_round_c(int, int, int, char local[], char remote[],
                                       int levels[], int *bit_count);
-PRIVATE unsigned long long gr_round_c_char(int, int, int, char local[], char remote[],
+static unsigned long long gr_round_c_char(int, int, int, char local[], char remote[],
                                            char levels[], int *bit_count);
-PRIVATE int get_next_index(int, int, int);
-PRIVATE void compute_composite_2(BitShare **, BitShare **, BitShare **, BitShare **,
+static int get_next_index(int, int, int);
+static void compute_composite_2(BitShare **, BitShare **, BitShare **, BitShare **,
                                  int, int);
-PRIVATE void compute_composite_3(BitShare **, BitShare **, BitShare **, BitShare **,
+static void compute_composite_3(BitShare **, BitShare **, BitShare **, BitShare **,
                                  int, int);
-PRIVATE void update_b(BitShare **, BitShare **, bool *, int, int);
+static void update_b(BitShare **, BitShare **, bool *, int, int);
 
 // Addition
 AShare add(AShare x, AShare y)
@@ -231,7 +230,7 @@ BShare eq_b_async(BShare x1, BShare x2, BShare y1, BShare y2)
 
 // Computes bitwise equality for one tree level
 // The result is stored in the last numbits/2 bits of res
-PRIVATE BShare eq_b_level(int numbits, BShare z1, BShare z2)
+static BShare eq_b_level(int numbits, BShare z1, BShare z2)
 {
 
   const BShare mask = 1;
@@ -518,7 +517,7 @@ BitShare greater(const BShare x1, const BShare x2,
 //     ^ ~(x_l ^ y_l) & ~(x_{l−1} ^ y_{l−1}) &...& ~(x_2 ^ y_2) & (x_1 & ~y_1)  --->  (level length-1)
 //
 //     This step evaluates 'length' logical ANDs in total.
-PRIVATE unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length)
+static unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length)
 {
   // Compute (x_i ^ y_i)
   BShare xor1 = x1 ^ y1;
@@ -561,7 +560,7 @@ PRIVATE unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2
 //     ^ ~(x_l ^ y_l) & ~(x_{l−1} ^ y_{l−1}) &...& ~(x_2 ^ y_2) & ~(~x_1 & y_1)  --->  (level length-1)
 //
 //     This step evaluates 'length' logical ANDs in total.
-PRIVATE unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length)
+static unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length)
 {
   // Compute (x_i ^ y_i)
   BShare xor1 = x1 ^ y1;
@@ -599,7 +598,7 @@ PRIVATE unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y
 
 // B. Compute next to last AND at odd levels as well as 1st round of pairwise
 // ANDs at the last level. This step performs 'length' logical ANDs in total.
-PRIVATE unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2,
+static unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2,
                                       int length, char local[], char remote[])
 {
   // Compute ~(x_i ^ y_i)
@@ -645,7 +644,7 @@ PRIVATE unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2
 //    2. Evaluate a logical AND between the projected bit and the LSB at
 //       the corresponding level.
 //    3. Evaluate the next round of pairwise ANDs at the last level.
-PRIVATE unsigned long long gr_round_c(int i, int bits_left, int length, char local[], char remote[],
+static unsigned long long gr_round_c(int i, int bits_left, int length, char local[], char remote[],
                                       int levels[], int *bit_count)
 {
 
@@ -690,7 +689,7 @@ PRIVATE unsigned long long gr_round_c(int i, int bits_left, int length, char loc
   return to_send;
 }
 
-PRIVATE unsigned long long gr_round_c_char(int i, int bits_left, int length, char local[], char remote[],
+static unsigned long long gr_round_c_char(int i, int bits_left, int length, char local[], char remote[],
                                            char levels[], int *bit_count)
 {
 
@@ -1406,7 +1405,7 @@ void convert_single_bit_array(BShare *bit, AShare *ra, BShare *rb, int len,
 }
 
 // Used by cmp_swap_batch() to get the next valid index
-inline PRIVATE int get_next_index(int pos, int area, int comp_per_box)
+inline static int get_next_index(int pos, int area, int comp_per_box)
 {
   int box_start = (pos / area) * area;
   if ((pos + 1) >= (box_start + comp_per_box))
@@ -1888,7 +1887,7 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   }
 
   // Updates computed bit shares according to ASC/DESC direction
-  PRIVATE void update_b(BitShare * *bg1, BitShare * *bg2, bool *asc,
+  static void update_b(BitShare * *bg1, BitShare * *bg2, bool *asc,
                         int num_rows, int num_cols)
   {
     for (int i = 0; i < num_rows; i++)
@@ -1910,7 +1909,7 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   // Computes composite b = b^1_g OR (b^1_e AND b^2_g)
   // Composite bit shares are stored in bg1[0], bg2[0]
   // Requires 2 communication rounds in total (independent from 'num_rows')
-  PRIVATE void compute_composite_2(BitShare * *bg1, BitShare * *bg2,
+  static void compute_composite_2(BitShare * *bg1, BitShare * *bg2,
                                    BitShare * *be1, BitShare * *be2,
                                    int num_rows, int num_cols)
   {
@@ -1944,7 +1943,7 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   //                        (b^1_e AND b^2_e AND b^3_g)
   // Composite bit shares are stored in bg1[0], bg2[0]
   // Requires 4 communication rounds in total (independent from 'num_rows')
-  PRIVATE void compute_composite_3(BitShare * *bg1, BitShare * *bg2,
+  static void compute_composite_3(BitShare * *bg1, BitShare * *bg2,
                                    BitShare * *be1, BitShare * *be2,
                                    int num_rows, int num_cols)
   {

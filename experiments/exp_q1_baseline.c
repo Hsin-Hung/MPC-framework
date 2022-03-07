@@ -6,11 +6,10 @@
 
 #define DEBUG 0
 #define SHARE_TAG 193
-#define PRIVATE static
 #define COLS1 4
 #define COLS2 1
 
-PRIVATE void group_by_count_rca(BShareTable* table, unsigned att_index);
+static void group_by_count_rca(BShareTable* table, unsigned att_index);
 
 /**
  * Evaluates the performance of Q1 (comorbidity).
@@ -187,7 +186,7 @@ int main(int argc, char** argv) {
 // Group-by-count that uses a Ripple-carry-adder
 // The selected bits are in the last 2 columns of table (6, 7).
 // The counters are in columns 4, and 5.
-PRIVATE void group_by_count_rca(BShareTable* table, unsigned att_index) {
+static void group_by_count_rca(BShareTable* table, unsigned att_index) {
   BShare** c = table->contents;
   BShare mask=1, max=0xFFFFFFFFFFFFFFFF;
 
