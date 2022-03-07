@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
   test_next_rb_array(500);
 
   // tear down communication
-  MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }
 // test individual binary r generation

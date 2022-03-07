@@ -1,18 +1,16 @@
-CC= gcc -std=c99
-CFLAGS= -O3 -Wall -lsodium
-# MPI= mpicc
-SRC=../src
-PRIMITIVES= $(SRC)/comm.c $(SRC)/party.c $(SRC)/primitives.c $(SRC)/sharing.c $(SRC)/utils.c
-RELATIONAL= $(SRC)/relational.c
-RELATIONAL= $(SRC)/relational.c
+LIB := ../src/libsecrecy.a
 
-all:	comorbidity join-distinct
+.PHONY: all clean
 
-comorbidity:	comorbidity.c $(PRIMITIVES) $(RELATIONAL)
-			$(CC) $(CFLAGS) -o comorbidity comorbidity.c $(PRIMITIVES) $(RELATIONAL)
+# Nothing in this directory actually compiles
+#all:	comorbidity join-distinct
+all:
 
-join-distinct:	join_distinct.c $(PRIMITIVES) $(RELATIONAL)
-			$(CC) $(CFLAGS) -o join-distinct join_distinct.c $(PRIMITIVES) $(RELATIONAL)
+comorbidity:	comorbidity.c $(LIB)
+			$(CC) $(CFLAGS) -o comorbidity comorbidity.c $(LIB) $(LDFLAGS)
+
+join-distinct:	join_distinct.c $(LIB)
+			$(CC) $(CFLAGS) -o join-distinct join_distinct.c $(LIB) $(LDFLAGS)
 
 clean:
 			rm -f comorbidity join-distinct *.o *.exec

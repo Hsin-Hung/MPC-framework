@@ -14,6 +14,8 @@
 #define RANK_ONE_IP "10.0.0.67"
 #define RANK_TWO_IP "10.0.0.23"
 
+int succ_sock, pred_sock;
+
 int get_socket(int party_rank)
 {
 

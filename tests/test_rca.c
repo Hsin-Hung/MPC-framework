@@ -60,8 +60,8 @@ int main(int argc, char** argv) {
   exchange_rsz_seeds(succ, pred);
 
   // test x[i] == y[i]
-  Data res[10] = {35, -3, 0, -240, 693, 0, 0, 0, LONG_LONG_MAX+1,
-                    LONG_LONG_MIN-1};
+  Data res[10] = {35, -3, 0, -240, 693, 0, 0, 0, LLONG_MAX+1,
+                    LLONG_MIN-1};
   int len = 187;  // Each boolean addition requires 187 logical ANDs
   BShare rnums[len];
   for (int i=0; i<10; i++) {

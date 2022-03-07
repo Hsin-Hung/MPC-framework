@@ -9,8 +9,6 @@
 #define TRUE 1
 #define FALSE 0
 
-int succ_sock, pred_sock;
-
 struct TCP_Request
 {
 
