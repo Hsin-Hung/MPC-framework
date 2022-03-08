@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  const long ROWS_L = atol(argv[1]);
+  const long ROWS_L = atol(argv[argc - 1]);
 
   // initialize communication
   init(argc, argv);

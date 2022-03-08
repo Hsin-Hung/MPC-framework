@@ -20,9 +20,9 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS = atol(argv[1]); // input size
-  const int COLS = atoi(argv[2]); // number of columns
-  const int ATT = atoi(argv[3]); // number of sorting attributes (up to 3)
+  const long ROWS = atol(argv[argc - 3]); // input size
+  const int COLS = atoi(argv[argc - 2]); // number of columns
+  const int ATT = atoi(argv[argc - 1]); // number of sorting attributes (up to 3)
   assert(ATT<=COLS);
   assert(ATT<4 && ATT>0);
 

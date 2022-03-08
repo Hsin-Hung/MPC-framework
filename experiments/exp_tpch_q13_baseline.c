@@ -24,8 +24,8 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS_C = atol(argv[1]); // input1 size
-  const long ROWS_O = atol(argv[2]); // input2 size
+  const long ROWS_C = atol(argv[argc - 2]); // input1 size
+  const long ROWS_O = atol(argv[argc - 1]); // input2 size
 
   const int rank = get_rank();
   const int pred = get_pred();

@@ -19,8 +19,8 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  const long ROWS1 = atol(argv[1]);      // input size
-  const long BATCH_SIZE = atol(argv[2]); // batch size
+  const long ROWS1 = atol(argv[argc - 2]);      // input size
+  const long BATCH_SIZE = atol(argv[argc - 1]); // batch size
 
   // initialize communication
   init(argc, argv);

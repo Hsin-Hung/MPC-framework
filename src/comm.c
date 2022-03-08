@@ -1,41 +1,151 @@
 #include "comm.h"
+#include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-
-#define SA struct sockaddr
+#include <getopt.h>
 
 #define NUM_PARTIES 3
 #define XCHANGE_MSG_TAG 7
 #define OPEN_MSG_TAG 777
+#define DEFAULT_PORT 8000
 
-int rank = 0, num_parties = 3;
-int initialized = 0;
+extern char *optarg;
+extern int optind, opterr, optopt;
+
+struct secrecy_config config;
 
 static void check_init(const char *f);
 
-// initialize MPI, rank, num_parties
+const static char *opt_str = "r:c:p:i:h";
+
+const static struct option opts[] = {
+    { "rank",    required_argument, NULL, 'r' },
+    { "count",   required_argument, NULL, 'c' },
+    { "port",    required_argument, NULL, 'p' },
+    { "ips",     required_argument, NULL, 'i' },
+    { "help",    no_argument,       NULL, 'h' },
+    { NULL,      0,                 NULL, 0 }
+};
+
+static void print_usage(const char *name)
+{
+    printf("Usage: %s <opts>\n", name);
+    printf("<opts>:\n");
+    printf("    -r|--rank     The rank of this node (from 0 to parties - 1)\n");
+    printf("    -c|--count    The count of parties participating\n");
+    printf("    -p|--port     The to use for internode communication, defaults to 8000\n");
+    printf("    -i|--ips      Comma delimited list of ip addresses in rank order\n");
+    printf("    -h|--help     Print this message\n");
+};
+
+static int parse_opts(int argc, char **argv)
+{
+    int c;
+    char *haystack = NULL;
+    unsigned int i;
+
+    // Set the port here, if the user specified a value this will be overwritten
+    config.port = DEFAULT_PORT;
+    int opt_index = 0;
+    while (1)
+    {
+        c = getopt_long(argc, argv, opt_str, opts, &opt_index);
+        if (c == -1)
+            break;
+
+        switch (c)
+        {
+        case 'r':
+            config.rank = atoi(optarg);
+            break;
+
+        case 'c':
+            config.num_parties = atoi(optarg);
+            break;
+
+        case 'p':
+            config.port = atoi(optarg);
+            break;
+
+        case 'i':
+            if (optarg == NULL)
+            {
+                printf("Missing argument to --ips switch\n");
+                print_usage(argv[0]);
+                return -1;
+            }
+
+            haystack = optarg;
+            break;
+
+        case 'h':
+        case '?':
+            print_usage(argv[0]);
+            return -1;
+
+        default:
+            printf("Unknown option -%o\n", c);
+            print_usage(argv[0]);
+            return -1;
+        }
+    }
+
+    if (haystack != NULL)
+    {
+        config.ip_list = calloc(config.num_parties, sizeof(char*));
+        if (config.ip_list == NULL)
+        {
+            printf("Failed to allocate memory for ip list\n");
+            return -1;
+        }
+        char *next = NULL;
+        i = 0;
+        do
+        {
+            config.ip_list[i] = haystack;
+            i++;
+            if (i >= config.num_parties)
+                break;
+            next = strchr(haystack, ',');
+            if (next != NULL)
+            {
+                *next = '\0';
+                haystack = next + 1;
+            }
+        } while(next != NULL);
+    }
+
+    if (config.ip_list == NULL || config.num_parties == 0)
+    {
+        printf("Invalid configuration, you must specify node rank, count of parties, and the ip list\n");
+        print_usage(argv[0]);
+        return -1;
+    }
+
+    config.initialized = 1;
+
+    return 0;
+}
+
+// initialize communication, config.rank, num_parties
 void init(int argc, char **argv)
 {
-  char *a = argv[1];
-  int num = atoi(a);
-  rank = num;
-  
-  initialized = 1;
+    if (parse_opts(argc, argv))
+    {
+        printf("Failed to parse input options\n");
+        exit(1);
+    }
 
-  TCP_Init(argc, argv);
-  TCP_Comm_rank(&rank);
-  TCP_Comm_size(&num_parties);
-  // this protocol works with 3 parties only
-  if (rank == 0 && num_parties != NUM_PARTIES)
-  {
-    fprintf(stderr, "ERROR: The number of MPI processes must be %d for %s\n", NUM_PARTIES, argv[0]);
-  }
-
-  
+    TCP_Init();
+    // this protocol works with 3 parties only
+    if (config.rank == 0 && config.num_parties != NUM_PARTIES)
+    {
+        fprintf(stderr, "ERROR: The number of processes must be %d for %s\n", NUM_PARTIES, argv[0]);
+    }
 }
 
 // finalize MPI: (VK: This doesn't work but I don't know why)
@@ -164,7 +274,7 @@ void exchange_bit_shares_array(const BitShare *shares1, BitShare *shares2,
 int get_rank()
 {
   check_init(__func__);
-  return rank;
+  return config.rank;
 }
 
 int get_succ()
@@ -183,12 +293,12 @@ int get_pred()
 Data open_b(BShare s)
 {
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(&s, 1, 0, sizeof(BShare));
     return s;
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     Data msg, res = s;
     // P1 receives shares from P2, P3
@@ -201,7 +311,7 @@ Data open_b(BShare s)
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
     return 1;
   }
 }
@@ -210,12 +320,12 @@ Data open_b(BShare s)
 Data open_bit(BitShare s)
 {
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(&s, 1, 0, sizeof(BitShare));
     return s;
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     bool msg, res = s;
     //   // P1 receives shares from P2, P3
@@ -228,7 +338,7 @@ Data open_bit(BitShare s)
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
     return 1;
   }
 }
@@ -238,11 +348,11 @@ Data open_bit(BitShare s)
 void open_b_array(BShare *s, int len, Data res[])
 {
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(s, len, 0, sizeof(BShare));
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     BShare *msg = malloc(len * sizeof(BShare));
     assert(msg != NULL);
@@ -264,7 +374,7 @@ void open_b_array(BShare *s, int len, Data res[])
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
   }
 }
 
@@ -273,12 +383,12 @@ void open_b_array(BShare *s, int len, Data res[])
 void open_byte_array(char *s, int len, char res[])
 {
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
 
     TCP_Send(s, len, 0, sizeof(char));
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     char *msg = malloc(len * sizeof(char));
     assert(msg != NULL);
@@ -300,7 +410,7 @@ void open_byte_array(char *s, int len, char res[])
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
   }
 }
 
@@ -308,13 +418,13 @@ void open_byte_array(char *s, int len, char res[])
 Data open_a(AShare s)
 {
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(&s, 1, 0, sizeof(AShare));
 
     return s;
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     Data msg, res = s;
     // P1 receives shares from P2, P3
@@ -328,7 +438,7 @@ Data open_a(AShare s)
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
     return 1;
   }
 }
@@ -338,11 +448,11 @@ void open_array(AShare *s, int len, Data res[])
 {
 
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(s, len, 0, sizeof(AShare));
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     AShare *msg = malloc(len * sizeof(AShare));
     assert(msg != NULL);
@@ -364,7 +474,7 @@ void open_array(AShare *s, int len, Data res[])
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
   }
 }
 
@@ -376,11 +486,11 @@ void open_mixed_array(BShare *s, int rows, int cols, Data res[],
   assert((al + bl) == cols);
   int len = rows * cols;
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(s, len, 0, sizeof(BShare));
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     BShare *msg = malloc(rows * cols * sizeof(BShare)); // BShare and AShare have equal size
     assert(msg != NULL);
@@ -420,18 +530,18 @@ void open_mixed_array(BShare *s, int rows, int cols, Data res[],
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
   }
 }
 
 void open_bit_array(BitShare *s, int len, bool res[])
 {
   // P2, P3 send their shares to P1
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(s, len, 0, sizeof(BitShare));
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     BitShare *msg = malloc(len * sizeof(BitShare));
     assert(msg != NULL);
@@ -453,7 +563,7 @@ void open_bit_array(BitShare *s, int len, bool res[])
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
   }
 }
 
@@ -463,12 +573,12 @@ Data reveal_b(BShare s)
   Data res = s;
 
   // P2, P3 send their shares to P1 and receive the result
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(&s, 1, 0, sizeof(BShare));
     TCP_Recv(&res, 1, 0, sizeof(Data));
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     Data msg;
     // P1 receives shares from P2, P3
@@ -483,7 +593,7 @@ Data reveal_b(BShare s)
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
     return 1;
   }
   return res;
@@ -493,12 +603,12 @@ Data reveal_b(BShare s)
 void reveal_b_array(BShare *s, int len)
 {
   // P2, P3 send their shares to P1 and receive the result
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(s, len, 0, sizeof(BShare));
     TCP_Recv(s, len, 0, sizeof(BShare));
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     Data *msg = malloc(len * sizeof(Data));
     assert(msg != NULL);
@@ -520,7 +630,7 @@ void reveal_b_array(BShare *s, int len)
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
   }
 }
 
@@ -528,7 +638,7 @@ void reveal_b_array_async(BShare *s, int len)
 {
   struct TCP_Request r1, r2;
   // // P2, P3 send their shares to P1 and receive the result
-  if (rank == 1 || rank == 2)
+  if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(s, len, 0, sizeof(BShare));
     TCP_Recv(s, len, 0, sizeof(BShare));
@@ -540,7 +650,7 @@ void reveal_b_array_async(BShare *s, int len)
     // TCP_Wait(&r1);
     // TCP_Wait(&r2);
   }
-  else if (rank == 0)
+  else if (config.rank == 0)
   {
     Data *msg = malloc(len * sizeof(Data));
     assert(msg != NULL);
@@ -574,14 +684,14 @@ void reveal_b_array_async(BShare *s, int len)
   }
   else
   {
-    fprintf(stderr, "ERROR: Invalid rank %d.\n", rank);
+    fprintf(stderr, "ERROR: Invalid config.rank %d.\n", config.rank);
   }
 }
 
 // check if communication has been initialized
 static void check_init(const char *f)
 {
-  if (!initialized)
+  if (!config.initialized)
   {
     fprintf(stderr, "ERROR: init() must be called before %s\n", f);
   }

@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  const int ROWS1 = atoi(argv[1]);
-  const int ROWS2 = atoi(argv[2]);
+  const int ROWS1 = atoi(argv[argc - 2]);
+  const int ROWS2 = atoi(argv[argc - 1]);
 
   const int rank = get_rank();
   const int pred = get_pred();

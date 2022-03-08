@@ -23,9 +23,9 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS1 = atol(argv[1]); // input1 size
-  const long ROWS2 = atol(argv[2]); // input2 size
-  const int batch_size = atoi(argv[3]);
+  const long ROWS1 = atol(argv[argc - 1]); // input1 size
+  const long ROWS2 = atol(argv[argc - 2]); // input2 size
+  const int batch_size = atoi(argv[argc - 3]);
 
   const int rank = get_rank();
   const int pred = get_pred();

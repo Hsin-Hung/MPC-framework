@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS1 = atol(argv[1]); // input1 size
-  const long ROWS2 = atol(argv[2]); // input2 size
-  const int BATCH_SIZE = atoi(argv[3]); // batch size for left input
+  const long ROWS1 = atol(argv[argc - 3]); // input1 size
+  const long ROWS2 = atol(argv[argc - 2]); // input2 size
+  const int BATCH_SIZE = atoi(argv[argc - 1]); // batch size for left input
 
   const int rank = get_rank();
   const int pred = get_pred();

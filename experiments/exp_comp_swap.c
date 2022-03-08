@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS = atol(argv[1]); // input size
-  const int COLS = atoi(argv[2]); // number of columns (per share)
+  const long ROWS = atol(argv[argc - 2]); // input size
+  const int COLS = atoi(argv[argc - 1]); // number of columns (per share)
 
   const int rank = get_rank();
   const int pred = get_pred();

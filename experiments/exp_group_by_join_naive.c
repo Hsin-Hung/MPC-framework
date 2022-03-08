@@ -16,7 +16,7 @@ static void materialized_join(BShareTable *input1, BShareTable *input2,
 
 int main(int argc, char** argv) {
 
-  if (argc < 4) {
+  if (argc < 3) {
     printf("\n\nUsage: %s <NUM_ROWS_1> <NUM_ROWS_2>\n\n", argv[0]);
     return -1;
   }
@@ -24,8 +24,8 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS1 = atol(argv[2]); // input1 size
-  const long ROWS2 = atol(argv[3]); // input2 size
+  const long ROWS1 = atol(argv[argc - 2]); // input1 size
+  const long ROWS2 = atol(argv[argc - 1]); // input2 size
 
   const int rank = get_rank();
   const int pred = get_pred();

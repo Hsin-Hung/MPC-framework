@@ -12,7 +12,7 @@
 
 int main(int argc, char** argv) {
 
-  if (argc < 3) {
+  if (argc < 2) {
     printf("\n\nUsage: %s [INPUT_SIZE]\n\n", argv[0]);
     return -1;
   }
@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS = atol(argv[2]); // input size
+  const long ROWS = atol(argv[argc - 1]); // input size
 
   const int rank = get_rank();
   const int pred = get_pred();

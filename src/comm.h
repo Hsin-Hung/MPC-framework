@@ -7,7 +7,7 @@
 #include <sys/types.h>
 
 /*******************************************************************
- * init:    Initializes MPI and retrieves each party's rank.
+ * init:    Initializes communication and retrieves each party's rank.
  *          This method needs to be called before any other exchange
  *          or computation method.
  * *****************************************************************/

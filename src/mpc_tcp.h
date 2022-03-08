@@ -5,7 +5,6 @@
 #ifndef MPC_TCP_H
 #define MPC_TCP_H
 
-#define PORT 8000
 #define TRUE 1
 #define FALSE 0
 
@@ -20,21 +19,16 @@ struct TCP_Request
     int flag; /* send: 0, receive: 1 */
 };
 
-int get_socket(int party_rank);
+int get_socket(unsigned int party_rank);
 
-char *get_address(int rank);
+char *get_address(unsigned int rank);
+
 // args: the number of parties, assume we have mapping between rank -> ip:port
-int TCP_Init(int argc, char **argv);
+int TCP_Init();
 
 // set up initial MPC parties connections
 int TCP_Connect(int dest);
 int TCP_Accept(int source);
-
-/* assign a rank for this party */
-int TCP_Comm_rank(int *rank);
-
-/* assign the number of parties, which will always be 3 */
-int TCP_Comm_size(int *size);
 
 // Performs a standard-mode blocking send.
 int TCP_Send(const void *buf, int count, int dest, int data_size);

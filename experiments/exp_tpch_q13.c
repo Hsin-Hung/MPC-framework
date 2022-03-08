@@ -24,9 +24,9 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS_C = atol(argv[1]); // input1 size
-  const long ROWS_O = atol(argv[2]); // input2 size
-  const int BATCH_SIZE = atol(argv[3]); //batch size for semi-join
+  const long ROWS_C = atol(argv[argc - 3]); // input1 size
+  const long ROWS_O = atol(argv[argc - 2]); // input2 size
+  const int BATCH_SIZE = atol(argv[argc - 1]); //batch size for semi-join
 
   const int rank = get_rank();
   const int pred = get_pred();

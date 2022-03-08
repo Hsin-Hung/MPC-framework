@@ -9,16 +9,15 @@
 #include <sys/poll.h>
 #include "mpc_tcp.h"
 #include "comm.h"
+#include "config.h"
 
-#define RANK_ZERO_IP "10.0.0.91"
-#define RANK_ONE_IP "10.0.0.67"
-#define RANK_TWO_IP "10.0.0.23"
+int succ_sock;
+int pred_sock;
 
-int succ_sock, pred_sock;
+extern struct secrecy_config config;
 
-int get_socket(int party_rank)
+int get_socket(unsigned int party_rank)
 {
-
     if (party_rank == get_succ())
     {
         return succ_sock;
@@ -30,34 +29,23 @@ int get_socket(int party_rank)
 }
 
 /* get the IP address of given rank */
-char *get_address(int rank)
+char *get_address(unsigned int rank)
 {
-    if (rank == 0)
+    if (rank < config.num_parties)
     {
-
-        return RANK_ZERO_IP;
-    }
-    else if (rank == 1)
-    {
-        return RANK_ONE_IP;
-    }
-    else if (rank == 2)
-    {
-        return RANK_TWO_IP;
+        return config.ip_list[rank];
     }
     else
     {
-
         printf("No such rank!");
-        exit(-1);
+        return NULL;
     }
 
-    return 0;
+    return NULL;
 }
 
-int TCP_Init(int argc, char **argv)
+int TCP_Init()
 {
-
     /* init party 0 last */
     if (get_rank() == 0)
     {
@@ -66,7 +54,6 @@ int TCP_Init(int argc, char **argv)
     }
     else
     {
-
         TCP_Accept(get_pred());
         TCP_Connect(get_succ());
     }
@@ -93,7 +80,7 @@ int TCP_Connect(int dest)
     }
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_port = htons(config.port);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, get_address(dest), &serv_addr.sin_addr) <= 0)
@@ -126,7 +113,7 @@ int TCP_Accept(int source)
         exit(EXIT_FAILURE);
     }
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attaching socket to the port
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR,
                    &opt, sizeof(opt)))
     {
@@ -135,9 +122,9 @@ int TCP_Accept(int source)
     }
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
+    address.sin_port = htons(config.port);
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attaching socket to the port
     if (bind(server_fd, (struct sockaddr *)&address,
              sizeof(address)) < 0)
     {
@@ -157,18 +144,6 @@ int TCP_Accept(int source)
     }
 
     pred_sock = new_socket;
-}
-
-int TCP_Comm_rank(int *rank)
-{
-
-    return 0;
-}
-
-int TCP_Comm_size(int *size)
-{
-
-    return 0;
 }
 
 int TCP_Send(const void *buf, int count, int dest, int data_size)
@@ -218,7 +193,7 @@ int TCP_Isend(const void *buf, int count, int dest, int data_size, struct TCP_Re
         return -1;
     }
     socket_addr->sin_family = AF_INET;
-    socket_addr->sin_port = htons(PORT);
+    socket_addr->sin_port = htons(config.port);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, get_address(dest), &(socket_addr->sin_addr)) <= 0)
@@ -263,7 +238,7 @@ int TCP_Irecv(void *buf, int count, int source, int data_size, struct TCP_Reques
         exit(-1);
     }
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attaching socket to the port
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR,
                    &opt, sizeof(opt)))
     {
@@ -272,9 +247,9 @@ int TCP_Irecv(void *buf, int count, int source, int data_size, struct TCP_Reques
     }
     socket_addr->sin_family = AF_INET;
     socket_addr->sin_addr.s_addr = INADDR_ANY;
-    socket_addr->sin_port = htons(PORT);
+    socket_addr->sin_port = htons(config.port);
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attaching socket to the port
     if (bind(server_fd, (struct sockaddr *)socket_addr,
              sizeof(*socket_addr)) < 0)
     {
