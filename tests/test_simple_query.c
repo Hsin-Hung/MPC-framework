@@ -276,16 +276,16 @@ void test_simple_query(struct shares w, struct shares r, struct shares r2) {
   }
   #endif
 
-  /** 1st phase: Each party computes its join predicate share 
+  /** 1st phase: Each party computes its join predicate share
    * and the conjuction of the selection predicates **/
 
   // join equality results
-  AShare z1[p1_r1.numRows*p1_r2.numRows]; 
+  AShare z1[p1_r1.numRows*p1_r2.numRows];
   AShare z2[p2_r1.numRows*p2_r2.numRows];
   AShare z3[p3_r1.numRows*p3_r2.numRows];
 
   // selection results
-  AShare selection_p1[p1_r1.numRows*p1_r2.numRows]; 
+  AShare selection_p1[p1_r1.numRows*p1_r2.numRows];
   AShare selection_p2[p2_r1.numRows*p2_r2.numRows];
   AShare selection_p3[p3_r1.numRows*p3_r2.numRows];
   int k = 0;
@@ -300,7 +300,7 @@ void test_simple_query(struct shares w, struct shares r, struct shares r2) {
       z1[k] = eq(left_id_1, left_id_2, right_id_1, right_id_2,
                    w.s1, w.s2,r.s1);
       // Break selections
-      selection_p1[k++] = and(selection_p1_r1[i], selection_p2_r1[i], 
+      selection_p1[k++] = and(selection_p1_r1[i], selection_p2_r1[i],
                          selection_p1_r2[j], selection_p2_r2[j],
                          r.s1, r2.s1);
     }
@@ -317,7 +317,7 @@ void test_simple_query(struct shares w, struct shares r, struct shares r2) {
       z2[k] = eq(left_id_1, left_id_2, right_id_1, right_id_2,
                    w.s2, w.s3,r.s2);
       // Break selections
-      selection_p2[k++] = and(selection_p2_r1[i], selection_p3_r1[i], 
+      selection_p2[k++] = and(selection_p2_r1[i], selection_p3_r1[i],
                          selection_p2_r2[j], selection_p3_r2[j],
                          r.s2, r2.s2);
     }
@@ -334,8 +334,8 @@ void test_simple_query(struct shares w, struct shares r, struct shares r2) {
       z3[k] = eq(left_id_1, left_id_2, right_id_1, right_id_2,
                    w.s3, w.s1,r.s3);
       // Break selections
-      selection_p3[k++] = and(selection_p3_r1[i], selection_p1_r1[i], 
-                         selection_p3_r2[j], selection_p1_r2[j], 
+      selection_p3[k++] = and(selection_p3_r1[i], selection_p1_r1[i],
+                         selection_p3_r2[j], selection_p1_r2[j],
                          r.s3, r2.s3);
     }
   }
@@ -345,7 +345,7 @@ void test_simple_query(struct shares w, struct shares r, struct shares r2) {
    * and join predicates **/
 
   // results
-  AShare out1[p1_r1.numRows*p1_r2.numRows]; 
+  AShare out1[p1_r1.numRows*p1_r2.numRows];
   AShare out2[p2_r1.numRows*p2_r2.numRows];
   AShare out3[p3_r1.numRows*p3_r2.numRows];
 
@@ -373,4 +373,6 @@ void test_simple_query(struct shares w, struct shares r, struct shares r2) {
     }
   }
   #endif
+
+  TCP_Finalize();
 }

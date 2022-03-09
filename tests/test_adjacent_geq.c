@@ -4,7 +4,6 @@
 #include "test-utils.h"
 
 #define DEBUG 0
-#define SHARE_TAG 193
 #define ROWS 10
 
 int main(int argc, char** argv) {
@@ -23,33 +22,29 @@ int main(int argc, char** argv) {
   Data z[10][2] = {{2, 42}, {1, 42}, {2, 42}, {3, 42}, {15, 42}, {15, 43},
                   {15, 44}, {17, 1}, {19, 1}, {18, 1}};
 
-  // if (rank == 0) { //P1
+  if (rank == 0) { //P1
 
-  //   init_sharing();
+    init_sharing();
 
-  //   // generate z shares
-  //   for (int i=0; i<10; i++) {
-  //       for (int j=0; j<2; j++) {
-  //           generate_bool_share(z[i][j], &zs1[i][j], &zs2[i][j], &zs3[i][j]);
-  //       }
-  //   }
+    // generate z shares
+    for (int i=0; i<10; i++) {
+        for (int j=0; j<2; j++) {
+            generate_bool_share(z[i][j], &zs1[i][j], &zs2[i][j], &zs3[i][j]);
+        }
+    }
 
-  //   //Send shares to P2
-  //   MPI_Send(&zs2[0][0], 10*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&zs3[0][0], 10*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+    //Send shares to P2
+    TCP_Send(&zs2[0][0], ROWS * 2, 1, sizeof(BShare));
+    TCP_Send(&zs3[0][0], ROWS * 2, 1, sizeof(BShare));
 
-  //   //Send shares to P3
-  //   MPI_Send(&zs3[0][0], 10*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&zs1[0][0], 10*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  // }
-  // else if (rank == 1) { //P2
-  //   MPI_Recv(&zs1[0][0], 10*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&zs2[0][0], 10*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
-  // else { //P3
-  //   MPI_Recv(&zs1[0][0], 10*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&zs2[0][0], 10*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
+    //Send shares to P3
+    TCP_Send(&zs3[0][0], ROWS * 2, 2, sizeof(BShare));
+    TCP_Send(&zs1[0][0], ROWS * 2, 2, sizeof(BShare));
+  }
+  else { //P2 and P3
+    TCP_Recv(&zs1[0][0], ROWS * 2, 0, sizeof(BShare));
+    TCP_Recv(&zs2[0][0], ROWS * 2, 0, sizeof(BShare));
+  }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -97,6 +92,6 @@ int main(int argc, char** argv) {
     printf("TEST ADJACENT GEQ: OK.\n");
   }
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

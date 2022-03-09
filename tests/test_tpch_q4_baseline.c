@@ -5,7 +5,6 @@
 #include "test-utils.h"
 
 #define DEBUG 0
-#define SHARE_TAG 193
 #define COLS_O 4
 #define COLS_L 4
 #define D1 1993
@@ -46,99 +45,6 @@ int main(int argc, char** argv) {
 
   // shares of constants (dates)
   BShare sd1, sd2;
-
-  // if (rank == 0) { //P1
-  //   // Initialize input data and shares
-  //   Data orders[ROWS_O][COLS_O] = {{2, 1994, 200, 0},
-  //                                 {1, 1993, 100, 0},
-  //                                 {4, 1994, 100, 0},
-  //                                 {7, 1991, 300, 0}};
-
-  //   Data lineitem[ROWS_L][COLS_L] = {{1, 1991, 1993, 0},
-  //                                   {2, 1992, 1994, 0},
-  //                                   {3, 1993, 1993, 0},
-  //                                   {4, 1992, 1994, 0},
-  //                                   {5, 1995, 1994, 0},
-  //                                   {6, 1997, 1998, 0},
-  //                                   {1, 1995, 1994, 0},
-  //                                   {2, 1995, 1994, 0},
-  //                                   {3, 1990, 1997, 0},
-  //                                   {4, 2000, 1999, 0},
-  //                                   {5, 1998, 1994, 0},
-  //                                   {6, 1996, 1993, 0},
-  //                                   {6, 1993, 1994, 0},
-  //                                   {6, 1995, 1992, 0},
-  //                                   {5, 1999, 1995, 0},
-  //                                   {3, 1993, 1994, 0}};
-
-  //   Data ** c1 = allocate_2D_data_table(ROWS_O, COLS_O);
-  //   for (int i=0;i<ROWS_O;i++){
-  //     for(int j=0;j<COLS_O;j++){
-  //       c1[i][j] = orders[i][j];
-  //     }
-  //   }
-
-  //   Data ** c2 = allocate_2D_data_table(ROWS_L, COLS_L);
-  //   for (int i=0;i<ROWS_L;i++){
-  //     for(int j=0;j<COLS_L;j++){
-  //       c2[i][j] = lineitem[i][j];
-  //     }
-  //   }
-
-  //   Table r_orders = {-1, ROWS_O, COLS_O, c1};
-  //   Table r_lineitem = {-1, ROWS_L, COLS_L, c2};
-
-  //   // t1 Bshare tables for P2, P3 (local to P1)
-  //   BShareTable t12 = {-1, 1, ROWS_O, 2*COLS_O, 1};
-  //   allocate_bool_shares_table(&t12);
-  //   BShareTable t13 = {-1, 2, ROWS_O, 2*COLS_O, 1};
-  //   allocate_bool_shares_table(&t13);
-
-  //   // t2 Bshare tables for P2, P3 (local to P1)
-  //   BShareTable t22 = {-1, 1, ROWS_L, 2*COLS_L, 2};
-  //   allocate_bool_shares_table(&t22);
-  //   BShareTable t23 = {-1, 2, ROWS_L, 2*COLS_L, 2};
-  //   allocate_bool_shares_table(&t23);
-
-  //   BShare d12, d22, d13, d23;
-
-  //   init_sharing();
-
-  //   // Generate boolean shares for r1
-  //   generate_bool_share_tables(&r_orders, &t1, &t12, &t13);
-  //   // Generate boolean shares for r2
-  //   generate_bool_share_tables(&r_lineitem, &t2, &t22, &t23);
-  //   // generate shares for constants
-  //   generate_bool_share(D1, &sd1, &d12, &d13);
-  //   generate_bool_share(D2, &sd2, &d22, &d23);
-
-  //   //Send shares to P2
-  //   MPI_Send(&(t12.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&(t22.contents[0][0]), ROWS_L*2*COLS_L, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&d12, 1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&d22, 1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-
-  //   //Send shares to P3
-  //   MPI_Send(&(t13.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&(t23.contents[0][0]), ROWS_L*2*COLS_L, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&d13, 1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&d23, 1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-
-  //   // free temp tables
-  //   free(c1);
-  //   free(t12.contents);
-  //   free(t13.contents);
-  //   free(c2);
-  //   free(t22.contents);
-  //   free(t23.contents);
-
-  // }
-  // else { //P2 or P3
-  //   MPI_Recv(&(t1.contents[0][0]), ROWS_O*2*COLS_O, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&(t2.contents[0][0]), ROWS_L*2*COLS_L, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&sd1, 1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&sd2, 1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -337,6 +243,6 @@ int main(int argc, char** argv) {
   free(t1.contents); free(t2.contents);
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

@@ -4,7 +4,6 @@
 #include "test-utils.h"
 
 #define DEBUG 0
-#define SHARE_TAG 193
 #define ROWS 10
 
 /**
@@ -26,25 +25,22 @@ int main(int argc, char** argv) {
   AShare local[ROWS], remote[ROWS];
 
   // P1 generates Data BShares and random bit shares
-  // if (rank == 0) {
+  if (rank == 0) {
 
-  //   AShare ra2[ROWS], ra3[ROWS];
+    AShare ra2[ROWS], ra3[ROWS];
 
-  //   for (int i=0; i<ROWS; i++) {
-  //     generate_int_share(r[i], &local[i], &ra2[i], &ra3[i]);
-  //   }
+    for (int i=0; i<ROWS; i++) {
+      generate_int_share(r[i], &local[i], &ra2[i], &ra3[i]);
+    }
 
-  //   //Send shares to P2
-  //   MPI_Send(&ra2, ROWS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   //Send shares to P3
-  //   MPI_Send(&ra3, ROWS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  // }
-  // else if (rank == 1) { //P2
-  //   MPI_Recv(&local, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
-  // else { //P3
-  //   MPI_Recv(&local, ROWS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
+    //Send shares to P2
+    TCP_Send(ra2, ROWS, 1, sizeof(AShare));
+    //Send shares to P3
+    TCP_Send(ra2, ROWS, 2, sizeof(AShare));
+  }
+  else { // P2 and P3
+    TCP_Recv(local, ROWS, 0, sizeof(AShare));
+  }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);

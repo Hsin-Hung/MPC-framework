@@ -4,7 +4,6 @@
 #include "test-utils.h"
 
 #define DEBUG 0
-#define SHARE_TAG 193
 #define ROWS1 5
 #define COLS1 2
 #define ROWS2 4
@@ -44,28 +43,12 @@ int main(int argc, char** argv) {
         }
     }
 
-    // //Send shares to P2
-    // MPI_Send(&r1s2[0][0], 5*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    // MPI_Send(&r2s2[0][0], 4*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    // MPI_Send(&r1s3[0][0], 5*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    // MPI_Send(&r2s3[0][0], 4*2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-    // //Send shares to P3
-    // MPI_Send(&r1s3[0][0], 5*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    // MPI_Send(&r2s3[0][0], 4*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    // MPI_Send(&r1s1[0][0], 5*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-    // MPI_Send(&r2s1[0][0], 4*2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
   }
-  else if (rank == 1) { //P2
-    // MPI_Recv(&r1s1[0][0], 5*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    // MPI_Recv(&r2s1[0][0], 4*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    // MPI_Recv(&r1s2[0][0], 5*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    // MPI_Recv(&r2s2[0][0], 4*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  }
-  else { //P3
-    // MPI_Recv(&r1s1[0][0], 5*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    // MPI_Recv(&r2s1[0][0], 4*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    // MPI_Recv(&r1s2[0][0], 5*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    // MPI_Recv(&r2s2[0][0], 4*2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  else {
+    TCP_Recv(&r1s1[0][0], ROWS1 * COLS1, 0, sizeof(BShare));
+    TCP_Recv(&r2s1[0][0], ROWS2 * COLS1, 0, sizeof(BShare));
+    TCP_Recv(&r1s2[0][0], ROWS1 * COLS1, 0, sizeof(BShare));
+    TCP_Recv(&r2s2[0][0], ROWS2 * COLS1, 0, sizeof(BShare));
   }
 
   //exchange seeds
@@ -146,6 +129,6 @@ int main(int argc, char** argv) {
   }
 
   // tear down communication
-//   MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

@@ -12,7 +12,6 @@
  * R = r_local - r_remote, so that R0 ^ R1 ^ R2 = 0.
  *
  **/
-// #include "mpi.h"
 #include <stdio.h>
 #include <assert.h>
 
