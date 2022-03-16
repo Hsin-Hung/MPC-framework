@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   const int rank = get_rank();
   const int pred = get_pred();
   const int succ = get_succ();
-  
+
   BShare *r1s1, *r1s2;
   r1s1 = malloc(ROWS*sizeof(BShare));
   r1s2 = malloc(ROWS*sizeof(BShare));
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
-   
+
   struct timeval begin, end;
   long seconds, micro;
   double elapsed;
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   gettimeofday(&begin, 0);
 
   exchange_shares_array(r1s1, r1s2, ROWS);
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
   for (long i=0; i<ROWS; i++) {
     r1s2[i] = exchange_shares(r1s1[i]);
   }
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
   for (long i=0; i<ROWS; i++) {
     r1s2[i] = exchange_shares_async(r1s1[i]);
   }
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -98,6 +98,6 @@ int main(int argc, char** argv) {
   free(r1s1); free(r1s2);
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

@@ -4,7 +4,6 @@
 
 #include "exp-utils.h"
 
-#define SHARE_TAG 193
 #define COLS 1
 
 /**
@@ -99,7 +98,7 @@ int main(int argc, char** argv) {
   unsigned key_indices[1] = {0};
   group_by_count_micro(&t1, key_indices, 1, counters, remote_counters, rand_b,
                                                                        rand_a);
-                                                                       
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -114,6 +113,6 @@ int main(int argc, char** argv) {
   free(rand_a); free(rand_b);
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

@@ -4,8 +4,6 @@
 
 #include "exp-utils.h"
 
-#define SHARE_TAG 193
-
 /**
  * Evaluates the performance of binary equality.
  **/
@@ -25,7 +23,7 @@ int main(int argc, char** argv) {
   const int rank = get_rank();
   const int pred = get_pred();
   const int succ = get_succ();
-  
+
   BShare *r1s1, *r1s2, *r2s1, *r2s2;
   r1s1 = malloc(ROWS*sizeof(BShare));
   r1s2 = malloc(ROWS*sizeof(BShare));
@@ -90,15 +88,15 @@ int main(int argc, char** argv) {
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
-   
+
   struct timeval begin, end;
   long seconds, micro;
   double elapsed;
   BShare res;
 
   /* =======================================================
-     1. Measure SYNC element-based equality 
-  ======================================================== 
+     1. Measure SYNC element-based equality
+  ========================================================
   // start timer
   gettimeofday(&begin, 0);
 
@@ -106,7 +104,7 @@ int main(int argc, char** argv) {
     // equality
     res = eq_b_sync(r1s1[i], r1s2[i], r2s1[i], r2s2[i]);
   }
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -125,8 +123,8 @@ int main(int argc, char** argv) {
 */
 
 /*  =======================================================
-     2. Measure ASYNC element-based equality 
-  ======================================================== 
+     2. Measure ASYNC element-based equality
+  ========================================================
   // start timer
   gettimeofday(&begin, 0);
 
@@ -134,7 +132,7 @@ int main(int argc, char** argv) {
     // equality
     res = eq_b_async(r1s1[i], r1s2[i], r2s1[i], r2s2[i]);
   }
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -145,10 +143,10 @@ int main(int argc, char** argv) {
     printf("ASYNC\t%ld\t%.3f\n", ROWS, elapsed);
   }
 
-  
+
   =======================================================
-     3. Measure ASYNC array-based equality 
-  ========================================================*/ 
+     3. Measure ASYNC array-based equality
+  ========================================================*/
   BShare *res_array = malloc(ROWS*sizeof(BShare));
 
   // start timer
@@ -175,8 +173,8 @@ printf("after eq_b_array");
 
 
   /* =======================================================
-     4. Measure ASYNC-INTERLEAVE array-based equality 
-  ======================================================== 
+     4. Measure ASYNC-INTERLEAVE array-based equality
+  ========================================================
   // start timer
   gettimeofday(&begin, 0);
 
@@ -194,8 +192,8 @@ printf("after eq_b_array");
 
 
   =======================================================
-     5. Measure ASYNC-INTER-BATCH array-based equality 
-  ======================================================== 
+     5. Measure ASYNC-INTER-BATCH array-based equality
+  ========================================================
   // NOTE: TERRIBLE PERFORMANCE
   // start timer
   gettimeofday(&begin, 0);
@@ -213,6 +211,6 @@ printf("after eq_b_array");
   free(r1s1); free(r1s2); free(r2s1); free(r2s2); free(res_array);
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

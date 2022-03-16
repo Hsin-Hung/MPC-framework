@@ -4,7 +4,6 @@
 
 #include "exp-utils.h"
 
-#define SHARE_TAG 193
 #define COLS 2
 
 static void materialized_join(BShareTable *input1, BShareTable *input2,
@@ -71,7 +70,7 @@ int main(int argc, char** argv) {
     allocate_bool_shares_table(&t22);
     BShareTable t23 = {-1, 2, ROWS2, 2*COLS, 2};
     allocate_bool_shares_table(&t23);
-    
+
     init_sharing();
 
     // Generate boolean shares for r1
@@ -96,11 +95,7 @@ int main(int argc, char** argv) {
     free(t23.contents);
 
   }
-  else if (rank == 1) { //P2
-    TCP_Recv(&(t1.contents[0][0]), ROWS1*2*COLS, 0, sizeof(BShare));
-    TCP_Recv(&(t2.contents[0][0]), ROWS2*2*COLS, 0, sizeof(BShare));
-  }
-  else { //P3
+  else { //P2 or P3
     TCP_Recv(&(t1.contents[0][0]), ROWS1*2*COLS, 0, sizeof(BShare));
     TCP_Recv(&(t2.contents[0][0]), ROWS2*2*COLS, 0, sizeof(BShare));
   }
@@ -154,14 +149,14 @@ int main(int argc, char** argv) {
   // the results are in join_selected_a
   unsigned key_indices[1] = {0};
   group_by_count(&res_table, key_indices, 1, join_selected, join_selected_a, rb, ra);
-  
+
   free(join_selected);
-  
+
   // open result
   Data *open_res = malloc(ROWS1*ROWS2*sizeof(Data));
   assert(open_res !=NULL);
   open_array(join_selected_a, ROWS1*ROWS2, open_res);
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
