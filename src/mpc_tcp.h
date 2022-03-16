@@ -8,17 +8,6 @@
 #define TRUE 1
 #define FALSE 0
 
-struct TCP_Request
-{
-
-    int socket_fd;
-    struct sockaddr_in socket_addr;
-    int count;
-    struct pollfd fds[200];
-    void *buf;
-    int flag; /* send: 0, receive: 1 */
-};
-
 int get_socket(unsigned int party_rank);
 
 char *get_address(unsigned int rank);
@@ -35,15 +24,6 @@ int TCP_Send(const void *buf, int count, int dest, int data_size);
 
 //  Performs a standard-mode blocking receive.
 int TCP_Recv(void *buf, int count, int source, int data_size);
-
-//  Starts a standard-mode, nonblocking send
-int TCP_Isend(const void *buf, int count, int dest, int data_size, struct TCP_Request *r);
-
-// Starts a standard-mode, nonblocking receive
-int TCP_Irecv(void *buf, int count, int source, int data_size, struct TCP_Request *r);
-
-// Waits for an MPI send or receive to complete.
-int TCP_Wait(struct TCP_Request *r);
 
 // close all socket
 int TCP_Finalize();

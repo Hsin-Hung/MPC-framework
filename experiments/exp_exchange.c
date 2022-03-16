@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
   gettimeofday(&begin, 0);
 
   for (long i=0; i<ROWS; i++) {
-    r1s2[i] = exchange_shares_async(r1s1[i]);
+    r1s2[i] = exchange_shares(r1s1[i]);
   }
 
   // stop timer

@@ -12,10 +12,6 @@
  *          or computation method.
  * *****************************************************************/
 void init(int argc, char** argv);
-/*******************************************************************
- * close:   Cleanup and finalize MPI.
- * *****************************************************************/
-// void close();
 
 /*******************************************************************
  * get_rank:    Returns this party's rank.
@@ -35,8 +31,6 @@ int get_rank();
  *                  P3: x3, x1
  * *****************************************************************/
 BShare exchange_shares(BShare s1);
-
-BShare exchange_shares_async(BShare s1);
 
 /*******************************************************************
  * exchange_shares_u: Similar to exchange_shares() but for unsigned long long

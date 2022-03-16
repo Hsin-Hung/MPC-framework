@@ -219,7 +219,7 @@ BShare eq_b_async(BShare x1, BShare x2, BShare y1, BShare y2)
     // Exchange results of logical and, except for the final round
     if (l != numlevels - 1)
     {
-      res2 = exchange_shares_async(res1);
+      res2 = exchange_shares(res1);
     }
   }
 
@@ -295,7 +295,6 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
   BShare *res2 = malloc(len * sizeof(BShare)); // remote shares
   int numbits = sizeof(BShare) * 8;
   int numlevels = log2(numbits);
-  struct TCP_Request r1, r2;
   int exchanges = 10;
   long batch_size = len / exchanges;
 
@@ -320,24 +319,18 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
       if (((i + 1) % batch_size) == 0)
       {
 
-        TCP_Irecv(&res2[i - (batch_size - 1)], batch_size, get_succ(), sizeof(BShare), &r2);
-        TCP_Isend(&res[i - (batch_size - 1)], batch_size, get_pred(), sizeof(BShare), &r1);
+        TCP_Recv(&res2[i - (batch_size - 1)], batch_size, get_succ(), sizeof(BShare));
+        TCP_Send(&res[i - (batch_size - 1)], batch_size, get_pred(), sizeof(BShare));
       }
 
       //     // last exchange
       if (i == len - 1)
       {
 
-        TCP_Wait(&r1);
-        TCP_Wait(&r2);
-        TCP_Irecv(&res2[len - batch_size], batch_size, get_succ(), sizeof(BShare), &r2);
-        TCP_Isend(&res[len - batch_size], batch_size, get_pred(), sizeof(BShare), &r1);
+        TCP_Recv(&res2[len - batch_size], batch_size, get_succ(), sizeof(BShare));
+        TCP_Send(&res[len - batch_size], batch_size, get_pred(), sizeof(BShare));
       }
     }
-    //   // wait for last exchange before moving on the next level
-
-    TCP_Wait(&r1);
-    TCP_Wait(&r2);
   }
 
   // Last level (no exchange)
@@ -351,7 +344,7 @@ void eq_b_array_inter(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
   free(res2);
 }
 
-// array-based boolean equality with asynchronous exchange
+// array-based boolean equality with synchronous exchange
 // and interleaving between batches of elements
 void eq_b_array_inter_batch(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long len,
                             BShare *res)
@@ -360,8 +353,6 @@ void eq_b_array_inter_batch(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long
   BShare *res2 = malloc(len * sizeof(BShare)); // remote shares
   int numbits = sizeof(BShare) * 8;
   int numlevels = log2(numbits);
-  struct TCP_Request *r1 = malloc(len * sizeof(struct TCP_Request));
-  struct TCP_Request *r2 = malloc(len * sizeof(struct TCP_Request));
   // compute bitwise x^y^1
   for (long i = 0; i < len; i++)
   {
@@ -371,14 +362,6 @@ void eq_b_array_inter_batch(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long
 
   for (int l = 0; l < numlevels; l++)
   {
-
-    //   // wait for results of previous level
-    if (l > 0)
-    {
-
-      TCP_Wait(&r2);
-      TCP_Wait(&r1);
-    }
     for (long i = 0; i < len; i++)
     {
       res[i] = eq_b_level2(numbits >> l, res[i], res2[i]);
@@ -386,8 +369,8 @@ void eq_b_array_inter_batch(BShare *x1, BShare *x2, BShare *y1, BShare *y2, long
       //     // except for the final round
       if (l != numlevels - 1)
       {
-        TCP_Irecv(&res2[i], 1, get_succ(), sizeof(BShare), &r2[i]);
-        TCP_Isend(&res[i], 1, get_pred(), sizeof(BShare), &r1[i]);
+        TCP_Recv(&res2[i], 1, get_succ(), sizeof(BShare));
+        TCP_Send(&res[i], 1, get_pred(), sizeof(BShare));
       }
     }
   }
@@ -1419,7 +1402,6 @@ inline static int get_next_index(int pos, int area, int comp_per_box)
 void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, int len)
 {
 
-  struct TCP_Request r1, r2;
   BShare *w1 = malloc(len * sizeof(BShare)); // local share of x3
   assert(w1 != NULL);
   BShare *w2 = malloc(len * sizeof(BShare)); // remote share of x3
@@ -1447,23 +1429,18 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
     }
     // distribute shares to P2, P3
 
-    TCP_Isend(z12, len, 1, sizeof(BShare), &r1);
-    TCP_Isend(z13, len, 2, sizeof(BShare), &r2);
-
-    TCP_Wait(&r1);
-    TCP_Wait(&r2);
+    TCP_Send(z12, len, 1, sizeof(BShare));
+    TCP_Send(z13, len, 2, sizeof(BShare));
 
     free(z12);
     free(z13);
 
     //   // receive share of x3 from P3
-    TCP_Irecv(w1, len, 2, sizeof(BShare), &r1);
-    TCP_Wait(&r1);
+    TCP_Recv(w1, len, 2, sizeof(BShare));
     //   // generate pairs of random binary shares (R1)
     get_next_rb_pair_array(xb2, xb1, len);
     //   // receive share from P2 and compute xb1
-    TCP_Irecv(r_temp, len, 1, sizeof(BShare), &r1);
-    TCP_Wait(&r1);
+    TCP_Recv(r_temp, len, 1, sizeof(BShare));
     //   // compute xb1
     for (int i = 0; i < len; i++)
     {
@@ -1478,23 +1455,19 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   else if (get_rank() == 1)
   { // P2
     //   // receive share of x1+x2 frm P1
-    TCP_Irecv(xa1, len, 0, sizeof(AShare), &r1);
+    TCP_Recv(xa1, len, 0, sizeof(AShare));
     //   // receive share of x3
-    TCP_Irecv(w1, len, 2, sizeof(BShare), &r2);
+    TCP_Recv(w1, len, 2, sizeof(BShare));
 
-    TCP_Wait(&r1);
-    TCP_Wait(&r2);
     //   // generate pairs of random binary shares (R1)
     get_next_rb_pair_array(xb2, xb1, len);
     //   // send local to P1
-    TCP_Isend(xb2, len, 0, sizeof(BShare), &r1);
-    TCP_Wait(&r1);
+    TCP_Send(xb2, len, 0, sizeof(BShare));
     //   // xb2 contains the local share of R1
     //   // generate pairs of random binary shares (R2)
     get_next_rb_pair_array(r_temp, xb1, len);
     //   // receive share from P3 and compute xb1
-    TCP_Irecv(r_temp2, len, 2, sizeof(BShare), &r1);
-    TCP_Wait(&r1);
+    TCP_Recv(r_temp2, len, 2, sizeof(BShare));
     //   // compute xb1
     for (int i = 0; i < len; i++)
     {
@@ -1515,14 +1488,10 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
     }
 
     //   // receive share of x1+x2 frm P1
-    TCP_Irecv(xa1, len, 0, sizeof(AShare), &r1);
-    TCP_Wait(&r1);
+    TCP_Recv(xa1, len, 0, sizeof(AShare));
     //   // distribute shares to P1, P2
-    TCP_Isend(w13, len, 0, sizeof(BShare), &r1);
-    TCP_Isend(w2, len, 1, sizeof(BShare), &r2);
-
-    TCP_Wait(&r1);
-    TCP_Wait(&r2);
+    TCP_Send(w13, len, 0, sizeof(BShare));
+    TCP_Send(w2, len, 1, sizeof(BShare));
 
     free(w13);
 
@@ -1532,8 +1501,7 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
     //   // generate pairs of random binary shares (R2)
     get_next_rb_pair_array(r_temp, xb1, len);
     //   // send local to P2
-    TCP_Isend(r_temp, len, 1, sizeof(BShare), &r1);
-    TCP_Wait(&r1);
+    TCP_Send(r_temp, len, 1, sizeof(BShare));
     //   // r_temp contains the local share of R2
   }
 
@@ -1556,20 +1524,16 @@ void convert_a_to_b_array(AShare *xa1, AShare *xa2, BShare *xb1, BShare *xb2, in
   // reveal y to P3
   if (get_rank() == 0)
   {
-    TCP_Isend(w1, len, 2, sizeof(BShare), &r1);
-    TCP_Wait(&r1);
+    TCP_Send(w1, len, 2, sizeof(BShare));
   }
   else if (get_rank() == 1)
   { // P2
-    TCP_Isend(w1, len, 2, sizeof(BShare), &r1);
-    TCP_Wait(&r1);    
+    TCP_Send(w1, len, 2, sizeof(BShare));
   }
   else
   { // P3
-    TCP_Irecv(xb1, len, 0, sizeof(BShare), &r1);
-    TCP_Irecv(xa1, len, 1, sizeof(AShare), &r2);
-  TCP_Wait(&r1); 
-  TCP_Wait(&r2); 
+    TCP_Recv(xb1, len, 0, sizeof(BShare));
+    TCP_Recv(xa1, len, 1, sizeof(AShare));
 
         for (int i=0; i<len; i++) {
           xb1[i] ^= xa1[i];

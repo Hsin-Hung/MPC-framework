@@ -148,11 +148,6 @@ void init(int argc, char **argv)
     }
 }
 
-// finalize MPI: (VK: This doesn't work but I don't know why)
-/*void close() {
-   MPI_Finalize();
-}*/
-
 // exchange boolean shares: this is blocking
 BShare exchange_shares(BShare s1)
 {
@@ -161,23 +156,6 @@ BShare exchange_shares(BShare s1)
   TCP_Send(&s1, 1, get_pred(), sizeof(BShare));
   TCP_Recv(&s2, 1, get_succ(), sizeof(BShare));
   // // receive remote seed from successor
-  return s2;
-}
-
-// exchange boolean shares: this is blocking
-BShare exchange_shares_async(BShare s1)
-{
-  BShare s2;
-  // // receive remote share from successor
-  struct TCP_Request r1, r2;
-
-  TCP_Irecv(&s2, 1, get_succ(), sizeof(BShare), &r2);
-  TCP_Isend(&s1, 1, get_pred(), sizeof(BShare), &r1);
-  // // send s1 to predecessor
-
-  TCP_Wait(&r1);
-  TCP_Wait(&r2);
-
   return s2;
 }
 
@@ -208,16 +186,6 @@ BitShare exchange_bit_shares(BitShare s1)
 
 void exchange_shares_array(const BShare *shares1, BShare *shares2, long length)
 {
-
-  // // receive remote share from successor
-  struct TCP_Request r1, r2;
-
-  // TCP_Irecv(shares2, length, get_succ(), sizeof(BShare), &r2);
-  // TCP_Isend(shares1, length, get_pred(), sizeof(BShare), &r1);
-  // // // send s1 to predecessor
-
-  // TCP_Wait(&r1);
-  // TCP_Wait(&r2);
   TCP_Send(shares1, length, get_pred(), sizeof(BShare));
   TCP_Recv(shares2, length, get_succ(), sizeof(BShare));
 }
@@ -225,50 +193,21 @@ void exchange_shares_array(const BShare *shares1, BShare *shares2, long length)
 void exchange_shares_array_u(const unsigned long long *shares1,
                              unsigned long long *shares2, int length)
 {
-  // // receive remote share from successor
-
-  // // send s1 to predecessor
-  struct TCP_Request r1, r2;
-
   TCP_Send(shares1, length, get_pred(), sizeof(unsigned long long));
   TCP_Recv(shares2, length, get_succ(), sizeof(unsigned long long));
-
-  // TCP_Irecv(shares2, length, get_succ(), sizeof(unsigned long long), &r2);
-  // TCP_Isend(shares1, length, get_pred(), sizeof(unsigned long long), &r1);
-  // // // send s1 to predecessor
-
-  // TCP_Wait(&r1);
-  // TCP_Wait(&r2);
 }
 
 void exchange_a_shares_array(const AShare *shares1, AShare *shares2, int length)
 {
-  struct TCP_Request r1, r2;
-
   TCP_Send(shares1, length, get_pred(), sizeof(AShare));
   TCP_Recv(shares2, length, get_succ(), sizeof(AShare));
-  // TCP_Irecv(shares2, length, get_succ(), sizeof(AShare), &r2);
-  // TCP_Isend(shares1, length, get_pred(), sizeof(AShare), &r1);
-  // // // send s1 to predecessor
-
-  // TCP_Wait(&r1);
-  // TCP_Wait(&r2);
 }
 
 void exchange_bit_shares_array(const BitShare *shares1, BitShare *shares2,
                                int length)
 {
-  struct TCP_Request r1, r2;
-
   TCP_Send(shares1, length, get_pred(), sizeof(BitShare));
   TCP_Recv(shares2, length, get_succ(), sizeof(BitShare));
-
-  // TCP_Irecv(shares2, length, get_succ(), sizeof(BitShare), &r2);
-  // TCP_Isend(shares1, length, get_pred(), sizeof(BitShare), &r1);
-  // // // send s1 to predecessor
-
-  // TCP_Wait(&r1);
-  // TCP_Wait(&r2);
 }
 
 int get_rank()
@@ -636,19 +575,11 @@ void reveal_b_array(BShare *s, int len)
 
 void reveal_b_array_async(BShare *s, int len)
 {
-  struct TCP_Request r1, r2;
   // // P2, P3 send their shares to P1 and receive the result
   if (config.rank == 1 || config.rank == 2)
   {
     TCP_Send(s, len, 0, sizeof(BShare));
     TCP_Recv(s, len, 0, sizeof(BShare));
-    // TCP_Isend(s, len, 0, sizeof(BShare), &r1);
-    // TCP_Irecv(s, len, 0, sizeof(BShare), &r2);
-
-    // // // send s1 to predecessor
-
-    // TCP_Wait(&r1);
-    // TCP_Wait(&r2);
   }
   else if (config.rank == 0)
   {
@@ -660,11 +591,6 @@ void reveal_b_array_async(BShare *s, int len)
     TCP_Recv(&msg[0], len, 1, sizeof(Data));
     TCP_Recv(&msg2[0], len, 2, sizeof(Data));
 
-    // TCP_Irecv(&msg[0], len, 1, sizeof(Data), &r1);
-    // TCP_Irecv(&msg2[0], len, 2, sizeof(Data), &r2);
-    // TCP_Wait(&r1);
-    // TCP_Wait(&r2);
-
     for (int i = 0; i < len; i++)
     {
       s[i] ^= msg[i];
@@ -675,10 +601,6 @@ void reveal_b_array_async(BShare *s, int len)
     TCP_Send(s, len, 1, sizeof(BShare));
     TCP_Send(s, len, 2, sizeof(BShare));
 
-    // TCP_Isend(s, len, 1, sizeof(BShare), &r1);
-    // TCP_Isend(s, len, 2, sizeof(BShare), &r2);
-    // TCP_Wait(&r1);
-    // TCP_Wait(&r2);
     free(msg);
     free(msg2);
   }
