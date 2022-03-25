@@ -18,12 +18,12 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS = atol(argv[1]); // input size
+  const long ROWS = atol(argv[argc - 1]); // input size
 
   const int rank = get_rank();
   const int pred = get_pred();
   const int succ = get_succ();
-  
+
   BShare *r1s1, *r1s2;
   r1s1 = malloc(ROWS*sizeof(BShare));
   r1s2 = malloc(ROWS*sizeof(BShare));
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
-   
+
   struct timeval begin, end;
   long seconds, micro;
   double elapsed;
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   gettimeofday(&begin, 0);
 
   reveal_b_array(r1s1, ROWS);
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
   gettimeofday(&begin, 0);
 
   reveal_b_array_async(r1s1, ROWS);
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -76,6 +76,6 @@ int main(int argc, char** argv) {
   free(r1s1); free(r1s2);
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

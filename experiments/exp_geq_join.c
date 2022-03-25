@@ -5,7 +5,6 @@
 
 #include "exp-utils.h"
 
-#define SHARE_TAG 193
 #define COLS1 2
 #define COLS2 2
 
@@ -20,8 +19,8 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  const int ROWS1 = atoi(argv[1]);
-  const int ROWS2 = atoi(argv[2]);
+  const int ROWS1 = atoi(argv[argc - 2]);
+  const int ROWS2 = atoi(argv[argc - 1]);
 
   const int rank = get_rank();
   const int pred = get_pred();
@@ -41,69 +40,63 @@ int main(int argc, char** argv) {
   r2s2 = malloc(ROWS1*COLS1*sizeof(BShare));
   assert(r2s2!=NULL);
 
-  // if (rank == 0) { //P1
-  //   // Initialize input data and shares
-  //   Data r1[ROWS1][COLS1];
-  //   Data r2[ROWS2][COLS2];
-  //   BShare r1s3[ROWS1][COLS1], r2s3[ROWS2][COLS2];
+  if (rank == 0) { //P1
+    // Initialize input data and shares
+    Data r1[ROWS1][COLS1];
+    Data r2[ROWS2][COLS2];
+    BShare r1s3[ROWS1][COLS1], r2s3[ROWS2][COLS2];
 
-  //   // generate random data for r1
-  //   for (int i=0; i<ROWS1; i++) {
-  //     for (int j=0; j<COLS1; j++) {
-  //       r1[i][j] = random();
-  //     }
-  //   }
+    // generate random data for r1
+    for (int i=0; i<ROWS1; i++) {
+      for (int j=0; j<COLS1; j++) {
+        r1[i][j] = random();
+      }
+    }
 
-  //   // generate random data for r2
-  //   for (int i=0; i<ROWS2; i++) {
-  //     for (int j=0; j<COLS2; j++) {
-  //       r2[i][j] = random();
-  //     }
-  //   }
+    // generate random data for r2
+    for (int i=0; i<ROWS2; i++) {
+      for (int j=0; j<COLS2; j++) {
+        r2[i][j] = random();
+      }
+    }
 
-  //   printf("Done with initialization.\n");
+    printf("Done with initialization.\n");
 
-  //   init_sharing();
+    init_sharing();
 
-  //   // generate r1 shares
-  //   for (int i=0; i<ROWS1; i++) {
-  //       for (int j=0; j<COLS1; j++) {
-  //           generate_bool_share(r1[i][j], &r1s1[i*COLS1+j], &r1s2[i*COLS1+j], &r1s3[i][j]);
-  //       }
-  //   }
+    // generate r1 shares
+    for (int i=0; i<ROWS1; i++) {
+        for (int j=0; j<COLS1; j++) {
+            generate_bool_share(r1[i][j], &r1s1[i*COLS1+j], &r1s2[i*COLS1+j], &r1s3[i][j]);
+        }
+    }
 
-  //   // generate r2 shares
-  //   for (int i=0; i<ROWS2; i++) {
-  //       for (int j=0; j<COLS2; j++) {
-  //           generate_bool_share(r2[i][j], &r2s1[i*COLS2+j], &r2s2[i*COLS2+j], &r2s3[i][j]);
-  //       }
-  //   }
+    // generate r2 shares
+    for (int i=0; i<ROWS2; i++) {
+        for (int j=0; j<COLS2; j++) {
+            generate_bool_share(r2[i][j], &r2s1[i*COLS2+j], &r2s2[i*COLS2+j], &r2s3[i][j]);
+        }
+    }
 
-  //   printf("Done with share generation.\n");
+    printf("Done with share generation.\n");
 
-  //   //Send shares to P2
-  //   MPI_Send(r1s2, ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(r2s2, ROWS2*COLS2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&r2s3[0][0], ROWS2*COLS2, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   //Send shares to P3
-  //   MPI_Send(&r1s3[0][0], ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&r2s3[0][0], ROWS2*COLS2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(r1s1, ROWS1*COLS1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(r2s1, ROWS2*COLS2, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  // }
-  // else if (rank == 1) { //P2
-  //   MPI_Recv(r1s1, ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(r2s1, ROWS2*COLS2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(r1s2, ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(r2s2, ROWS2*COLS2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
-  // else { //P3
-  //   MPI_Recv(r1s1, ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(r2s1, ROWS2*COLS2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(r1s2, ROWS1*COLS1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(r2s2, ROWS2*COLS2, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
+    //Send shares to P2
+    TCP_Send(r1s2, ROWS1*COLS1, 1, sizeof(BShare));
+    TCP_Send(r2s2, ROWS2*COLS2, 1, sizeof(BShare));
+    TCP_Send(&r1s3[0][0], ROWS1*COLS1, 1, sizeof(BShare));
+    TCP_Send(&r2s3[0][0], ROWS2*COLS2, 1, sizeof(BShare));
+    //Send shares to P3
+    TCP_Send(&r1s3[0][0], ROWS1*COLS1, 2, sizeof(BShare));
+    TCP_Send(&r2s3[0][0], ROWS2*COLS2, 2, sizeof(BShare));
+    TCP_Send(r1s1, ROWS1*COLS1, 2, sizeof(BShare));
+    TCP_Send(r2s1, ROWS2*COLS2, 2, sizeof(BShare));
+  }
+  else { //P2 or P3
+    TCP_Recv(r1s1, ROWS1*COLS1, 0, sizeof(BShare));
+    TCP_Recv(r2s1, ROWS2*COLS2, 0, sizeof(BShare));
+    TCP_Recv(r1s2, ROWS1*COLS1, 0, sizeof(BShare));
+    TCP_Recv(r2s2, ROWS2*COLS2, 0, sizeof(BShare));
+  }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -178,6 +171,6 @@ int main(int argc, char** argv) {
   }
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

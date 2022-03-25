@@ -4,11 +4,9 @@
 
 #include "exp-utils.h"
 
-#define SHARE_TAG 193
-#define PRIVATE static
 #define COLS 2
 
-PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
+static void materialized_join(BShareTable *input1, BShareTable *input2,
                         int leftcol, int rightcol, BShareTable* result);
 
 /**
@@ -17,7 +15,7 @@ PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
 
 int main(int argc, char** argv) {
 
-  if (argc < 4) {
+  if (argc < 3) {
     printf("\n\nUsage: %s <NUM_ROWS_1> <NUM_ROWS_2>\n\n", argv[0]);
     return -1;
   }
@@ -25,8 +23,8 @@ int main(int argc, char** argv) {
   // initialize communication
   init(argc, argv);
 
-  const long ROWS1 = atol(argv[2]); // input1 size
-  const long ROWS2 = atol(argv[3]); // input2 size
+  const long ROWS1 = atol(argv[argc - 2]); // input1 size
+  const long ROWS2 = atol(argv[argc - 1]); // input2 size
 
   const int rank = get_rank();
   const int pred = get_pred();
@@ -72,7 +70,7 @@ int main(int argc, char** argv) {
     allocate_bool_shares_table(&t22);
     BShareTable t23 = {-1, 2, ROWS2, 2*COLS, 2};
     allocate_bool_shares_table(&t23);
-    
+
     init_sharing();
 
     // Generate boolean shares for r1
@@ -97,11 +95,7 @@ int main(int argc, char** argv) {
     free(t23.contents);
 
   }
-  else if (rank == 1) { //P2
-    TCP_Recv(&(t1.contents[0][0]), ROWS1*2*COLS, 0, sizeof(BShare));
-    TCP_Recv(&(t2.contents[0][0]), ROWS2*2*COLS, 0, sizeof(BShare));
-  }
-  else { //P3
+  else { //P2 or P3
     TCP_Recv(&(t1.contents[0][0]), ROWS1*2*COLS, 0, sizeof(BShare));
     TCP_Recv(&(t2.contents[0][0]), ROWS2*2*COLS, 0, sizeof(BShare));
   }
@@ -155,14 +149,14 @@ int main(int argc, char** argv) {
   // the results are in join_selected_a
   unsigned key_indices[1] = {0};
   group_by_count(&res_table, key_indices, 1, join_selected, join_selected_a, rb, ra);
-  
+
   free(join_selected);
-  
+
   // open result
   Data *open_res = malloc(ROWS1*ROWS2*sizeof(Data));
   assert(open_res !=NULL);
   open_array(join_selected_a, ROWS1*ROWS2, open_res);
-  
+
   // stop timer
   gettimeofday(&end, 0);
   seconds = end.tv_sec - begin.tv_sec;
@@ -183,7 +177,7 @@ int main(int argc, char** argv) {
 // The result is stored in a new BShareTable whose first columns contain
 // the matching pairs of the original tables and
 // the last 2 columns contain the join result bits.
-PRIVATE void materialized_join(BShareTable *input1, BShareTable *input2,
+static void materialized_join(BShareTable *input1, BShareTable *input2,
                         int leftcol, int rightcol, BShareTable* result) {
 
   int numbits = sizeof(BShare) * 8;

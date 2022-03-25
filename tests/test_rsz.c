@@ -12,7 +12,6 @@
  * R = r_local - r_remote, so that R0 ^ R1 ^ R2 = 0.
  *
  **/
-// #include "mpi.h"
 #include <stdio.h>
 #include <assert.h>
 
@@ -33,7 +32,7 @@ int main(int argc, char** argv) {
   test_next_rb_array(500);
 
   // tear down communication
-  MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }
 // test individual binary r generation

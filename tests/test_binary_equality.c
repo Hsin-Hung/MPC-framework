@@ -5,7 +5,6 @@
 
 #define DEBUG 0
 
-#define SHARE_TAG 193
 
 int main(int argc, char **argv)
 {

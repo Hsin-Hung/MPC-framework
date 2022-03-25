@@ -3,16 +3,14 @@
 #include "party.h"
 #include <stdio.h>
 
-#define PRIVATE static
-
-PRIVATE unsigned long long geq_round_a(BShare, BShare, BShare, BShare, int);
-PRIVATE unsigned long long gr_round_a(BShare, BShare, BShare, BShare, int);
-PRIVATE unsigned long long gr_round_b(BShare, BShare, BShare, BShare, int,
+static unsigned long long geq_round_a(BShare, BShare, BShare, BShare, int);
+static unsigned long long gr_round_a(BShare, BShare, BShare, BShare, int);
+static unsigned long long gr_round_b(BShare, BShare, BShare, BShare, int,
                                       char local[], char remote[]);
-PRIVATE unsigned long long gr_round_c(int, int, int, char local[],
+static unsigned long long gr_round_c(int, int, int, char local[],
                                       char remote[], int levels[],
                                       int *bit_count);
-PRIVATE unsigned long long gr_round_c_char(int, int, int, char local[],
+static unsigned long long gr_round_c_char(int, int, int, char local[],
                                            char remote[], char levels[],
                                            int *bit_count);
 
@@ -701,7 +699,7 @@ void group_by_sum_rca_sel(BShareTable* table, BShare* selected,
 }
 
 
-PRIVATE unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length) {
+static unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length) {
   // Compute (x_i ^ y_i)
   BShare xor1 = x1 ^ y1;
   BShare xor2 = x2 ^ y2;
@@ -728,7 +726,7 @@ PRIVATE unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2
   return last_ands;
 }
 
-PRIVATE unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1,
+static unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1,
                                        BShare y2, int length) {
   // Compute (x_i ^ y_i)
   BShare xor1 = x1 ^ y1;
@@ -764,7 +762,7 @@ PRIVATE unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1,
 
 // B. Compute next to last AND at odd levels as well as 1st round of pairwise
 // ANDs at the last level. This step performs 'length' logical ANDs in total.
-PRIVATE unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2,
+static unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2,
                                       int length, char local[], char remote[]) {
   // Compute ~(x_i ^ y_i)
   BShare not_xor1 = ~(x1^y1);
@@ -807,7 +805,7 @@ PRIVATE unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2
 //    2. Evaluate a logical AND between the projected bit and the LSB at
 //       the corresponding level.
 //    3. Evaluate the next round of pairwise ANDs at the last level.
-PRIVATE unsigned long long gr_round_c(int i, int bits_left, int length,
+static unsigned long long gr_round_c(int i, int bits_left, int length,
                                       char local[], char remote[],
                                       int levels[], int *bit_count) {
 
@@ -848,7 +846,7 @@ PRIVATE unsigned long long gr_round_c(int i, int bits_left, int length,
   return to_send;
 }
 
-PRIVATE unsigned long long gr_round_c_char(int i, int bits_left, int length, char local[], char remote[],
+static unsigned long long gr_round_c_char(int i, int bits_left, int length, char local[], char remote[],
                                       char levels[], int *bit_count) {
 
   int current_level, num_levels;

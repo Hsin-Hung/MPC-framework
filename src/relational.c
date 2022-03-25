@@ -3,37 +3,35 @@
 #include "party.h"
 #include <stdio.h>
 
-#define PRIVATE static
-
 // function declarations
-PRIVATE void select_eq(AShareTable input, int leftcol, AShare c1, AShare c2,
+static void select_eq(AShareTable input, int leftcol, AShare c1, AShare c2,
                        AShare result[]);
-PRIVATE void select_eq_b(BShareTable input, int leftcol, int rightcol,
+static void select_eq_b(BShareTable input, int leftcol, int rightcol,
                          BShare result[]);
-PRIVATE void select_greater_b(BShareTable input, int leftcol, BShare result[]);
-PRIVATE void select_greater_batch(BShareTable input, int leftcol, int rightcol,
+static void select_greater_b(BShareTable input, int leftcol, BShare result[]);
+static void select_greater_batch(BShareTable input, int leftcol, int rightcol,
                                   BShare result[]);
-PRIVATE void select_geq_b(BShareTable input, int leftcol, BShare result[]);
-PRIVATE void join_eq_b(BShareTable input1, BShareTable input2,
+static void select_geq_b(BShareTable input, int leftcol, BShare result[]);
+static void join_eq_b(BShareTable input1, BShareTable input2,
                         int leftcol, int rightcol, BShare result[]);
-PRIVATE void join_eq_b_batch(BShareTable *input1, BShareTable *input2,
+static void join_eq_b_batch(BShareTable *input1, BShareTable *input2,
                         int start1, int end1, int start2, int end2,
                         int leftcol, int rightcol, BShare *remote,
                         BShare *result);
-PRIVATE void join_geq_b_batch(BShareTable *input1, BShareTable *input2,
+static void join_geq_b_batch(BShareTable *input1, BShareTable *input2,
                         int start1, int end1, int start2, int end2,
                         int leftcol, int rightcol, BShare *remote,
                         BShare *result);
-PRIVATE void eq_bulk(int, int, BShare*, BShare*, int);
-PRIVATE void in_level(int, BShare*, BShare*);
-PRIVATE void distinct_batch_incr(BShareTable*, int, int, unsigned, BShare*);
+static void eq_bulk(int, int, BShare*, BShare*, int);
+static void in_level(int, BShare*, BShare*);
+static void distinct_batch_incr(BShareTable*, int, int, unsigned, BShare*);
 
 // TODO: KEEP THOSE ONLY IN PRIMITIVES
-PRIVATE unsigned long long geq_round_a(BShare, BShare, BShare, BShare, int);
-PRIVATE unsigned long long gr_round_a(BShare, BShare, BShare, BShare, int);
-PRIVATE unsigned long long gr_round_b(BShare, BShare, BShare, BShare, int,
+static unsigned long long geq_round_a(BShare, BShare, BShare, BShare, int);
+static unsigned long long gr_round_a(BShare, BShare, BShare, BShare, int);
+static unsigned long long gr_round_b(BShare, BShare, BShare, BShare, int,
                                       char local[], char remote[]);
-PRIVATE unsigned long long gr_round_c_char(int, int, int, char local[], char remote[],
+static unsigned long long gr_round_c_char(int, int, int, char local[], char remote[],
                                       char levels[], int *bit_count);
 
 // Selection on arithmetic shares
@@ -49,7 +47,7 @@ void select_a(AShareTable input, Predicate p, AShare c1, AShare c2, AShare resul
 }
 
 // Internal equality select: right must be a pointer to a pair of constants
-PRIVATE void select_eq(AShareTable input, int leftcol, AShare c1, AShare c2, AShare result[]) {
+static void select_eq(AShareTable input, int leftcol, AShare c1, AShare c2, AShare result[]) {
   for (int i = 0; i < input.numRows ;i++) {
 
     // generate w and r
@@ -107,7 +105,7 @@ void select_b(const BShareTable input, Predicate_B p, BShare result[]) {
  *  This is copmputed as (c-att) < 0 and col points to the difference shares of the
  *  attribute to be tested:
  **/
-PRIVATE void select_greater_b(BShareTable input, int leftcol, BShare result[]) {
+static void select_greater_b(BShareTable input, int leftcol, BShare result[]) {
   for (int i = 0; i < input.numRows; i++) {
     result[i] = ltz_b(input.contents[i][leftcol]);
   }
@@ -118,7 +116,7 @@ PRIVATE void select_greater_b(BShareTable input, int leftcol, BShare result[]) {
  *  This is copmputed as ~((att - c) < 0) and col points to the difference shares of the
  *  attribute to be tested:
  **/
-PRIVATE void select_geq_b(BShareTable input, int leftcol, BShare result[]) {
+static void select_geq_b(BShareTable input, int leftcol, BShare result[]) {
   for (int i = 0; i < input.numRows; i++) {
     result[i] = (ltz_b(input.contents[i][leftcol])&1)^1;
   }
@@ -129,7 +127,7 @@ PRIVATE void select_geq_b(BShareTable input, int leftcol, BShare result[]) {
  *  leftcol and rightcol point to the difference shares of the attribute to be tested:
  *  leftcol: att-c, rightcol: c-att
  **/
-PRIVATE void select_eq_b(BShareTable input, int leftcol, int rightcol, BShare result[]) {
+static void select_eq_b(BShareTable input, int leftcol, int rightcol, BShare result[]) {
   // r = (c-att < 0) ^ (att-c < 0) ^ 1
   BShare z1, z2;
   for (int i = 0; i < input.numRows; i++) {
@@ -143,7 +141,7 @@ PRIVATE void select_eq_b(BShareTable input, int leftcol, int rightcol, BShare re
  *  Internal inequality select for boolean shares.
  *  leftcol and rightcol point to two table columns
  **/
-PRIVATE void select_greater_batch(BShareTable input, int leftcol, int rightcol,
+static void select_greater_batch(BShareTable input, int leftcol, int rightcol,
                                   BShare result[]) {
   int numElements = input.numRows;
   BShare** c = input.contents;
@@ -270,7 +268,7 @@ void join_b(BShareTable input1, BShareTable input2, Predicate_B p, BShare result
 }
 
 // internal nested-loop equality join for boolean shares
-PRIVATE void join_eq_b(BShareTable input1, BShareTable input2,
+static void join_eq_b(BShareTable input1, BShareTable input2,
                         int leftcol, int rightcol, BShare result[]) {
   int i, j, k = 0;
 
@@ -307,7 +305,7 @@ void join_b_batch(BShareTable *input1, BShareTable *input2,
 }
 
 // batched version of internal nested-loop equality join for boolean shares
-PRIVATE void join_eq_b_batch(BShareTable *input1, BShareTable *input2,
+static void join_eq_b_batch(BShareTable *input1, BShareTable *input2,
                         int start1, int end1, int start2, int end2,
                         int leftcol, int rightcol, BShare* remote,
                         BShare* result) {
@@ -343,7 +341,7 @@ PRIVATE void join_eq_b_batch(BShareTable *input1, BShareTable *input2,
 }
 
 // batched version of internal nested-loop equality join for boolean shares
-PRIVATE void join_geq_b_batch(BShareTable *input1, BShareTable *input2,
+static void join_geq_b_batch(BShareTable *input1, BShareTable *input2,
                         int start1, int end1, int start2, int end2,
                         int leftcol, int rightcol, BShare* _remote,
                         BShare* result) {
@@ -532,7 +530,7 @@ void distinct_batch(BShareTable* table, unsigned att_index, BitShare* distinct,
 }
 
 // Same as distinct_batch but returns BShare
-PRIVATE void distinct_batch_incr(BShareTable* table, int start, int end,
+static void distinct_batch_incr(BShareTable* table, int start, int end,
                                     unsigned att_index, BShare* distinct) {
   int batch_size = end-start;
   int num_comparisons = start==0 ? batch_size-1 : batch_size;
@@ -842,7 +840,7 @@ void in_sel_right(BShareTable* left, BShareTable* right,
 }
 
 // Used by in()
-PRIVATE void in_level(int num_elements, BShare* z1, BShare* z2) {
+static void in_level(int num_elements, BShare* z1, BShare* z2) {
   const BShare mask = 1;
   for (int i=0, j=0; i<num_elements; i+=2, j++) {
     BShare bx1 = z1[i];
@@ -856,7 +854,7 @@ PRIVATE void in_level(int num_elements, BShare* z1, BShare* z2) {
 }
 
 // Used by in() and distinct_batch()
-PRIVATE void eq_bulk(int num_levels, int num_bits, BShare* local,
+static void eq_bulk(int num_levels, int num_bits, BShare* local,
                      BShare* remote, int length) {
   // For all rounds of the equality check (6 in total)
   for (int l=0; l<num_levels; l++) {
@@ -1415,7 +1413,7 @@ void group_by_join(BShareTable* left, BShareTable* right, int start_left,
   free(sum_right); free(sum_right_remote);
 }
 
-PRIVATE void bitonic_merge(BShare** contents, int low, int cnt,
+static void bitonic_merge(BShare** contents, int low, int cnt,
                            unsigned index_1, unsigned index_2,
                            int num_elements, int asc) {
   if (cnt>1) {
@@ -1536,7 +1534,7 @@ void mask(BShareTable* table, BShare* selected, int batch_size) {
 //     ^ ~(x_l ^ y_l) & ~(x_{l−1} ^ y_{l−1}) &...& ~(x_2 ^ y_2) & ~(~x_1 & y_1)  --->  (level length-1)
 //
 //     This step evaluates 'length' logical ANDs in total.
-PRIVATE unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length) {
+static unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length) {
   // Compute (x_i ^ y_i)
   BShare xor1 = x1 ^ y1;
   BShare xor2 = x2 ^ y2;
@@ -1582,7 +1580,7 @@ PRIVATE unsigned long long geq_round_a(BShare x1, BShare x2, BShare y1, BShare y
 //     ^ ~(x_l ^ y_l) & ~(x_{l−1} ^ y_{l−1}) &...& ~(x_2 ^ y_2) & (x_1 & ~y_1)  --->  (level length-1)
 //
 //     This step evaluates 'length' logical ANDs in total.
-PRIVATE unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length) {
+static unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2, int length) {
   // Compute (x_i ^ y_i)
   BShare xor1 = x1 ^ y1;
   BShare xor2 = x2 ^ y2;
@@ -1611,7 +1609,7 @@ PRIVATE unsigned long long gr_round_a(BShare x1, BShare x2, BShare y1, BShare y2
 
 // B. Compute next to last AND at odd levels as well as 1st round of pairwise
 // ANDs at the last level. This step performs 'length' logical ANDs in total.
-PRIVATE unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2,
+static unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2,
                                       int length, char local[], char remote[]) {
   // Compute ~(x_i ^ y_i)
   BShare not_xor1 = ~(x1^y1);
@@ -1646,7 +1644,7 @@ PRIVATE unsigned long long gr_round_b(BShare x1, BShare x2, BShare y1, BShare y2
   return local_bits;
 }
 
-PRIVATE unsigned long long gr_round_c_char(int i, int bits_left, int length, char local[], char remote[],
+static unsigned long long gr_round_c_char(int i, int bits_left, int length, char local[], char remote[],
                                       char levels[], int *bit_count) {
 
   int current_level, num_levels;

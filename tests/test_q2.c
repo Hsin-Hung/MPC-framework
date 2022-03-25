@@ -5,8 +5,6 @@
 #include "test-utils.h"
 
 #define DEBUG 0
-#define SHARE_TAG 193
-#define PRIVATE static
 #define COLS 6 // Diagnosis(pid, time, time_15, time+56, diag-cdiff, cdiff-diag)
 
 /**
@@ -27,52 +25,6 @@ int main(int argc, char** argv) {
   // The input tables per party
   BShareTable t1 = {-1, rank, ROWS, 2*COLS, 1}; // {pid, diag, cnt}
   allocate_bool_shares_table(&t1);
-
-  // if (rank == 0) { //P1
-  //   // Initialize input data and shares
-  //   // Diagnosis(pid, time, time_15, time+56, diag-cdiff, cdiff-diag)
-  //   Data in1[ROWS][COLS] = {{0, 1, 16, 57, 0, 0}, {0, 17, 32, 73, 0, 0},
-  //                           {0, 37, 52, 73, 0, 0}, {1, 5, 20, 61, -2, 2},
-  //                           {1, 6, 21, 62, -3, 3}, {1, 7, 22, 63, 0, 0},
-  //                           {2, 10, 25, 66, 0, 0}, {2, 76, 91, 132, 0, 0}};
-
-  //   Data ** c1 = allocate_2D_data_table(ROWS, COLS);
-  //   for (int i=0;i<ROWS;i++){
-  //     for(int j=0;j<COLS;j++){
-  //       c1[i][j] = in1[i][j];
-  //     }
-  //   }
-  //   Table r1 = {-1, ROWS, COLS, c1};
-
-  //   // t1 Bshare tables for P2, P3 (local to P1)
-  //   BShareTable t12 = {-1, 1, ROWS, 2*COLS, 1};
-  //   allocate_bool_shares_table(&t12);
-  //   BShareTable t13 = {-1, 2, ROWS, 2*COLS, 1};
-  //   allocate_bool_shares_table(&t13);
-
-  //   init_sharing();
-
-  //   // Generate boolean shares for r1
-  //   generate_bool_share_tables(&r1, &t1, &t12, &t13);
-
-  //   //Send shares to P2
-  //   MPI_Send(&(t12.contents[0][0]), ROWS*2*COLS, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-
-  //   //Send shares to P3
-  //   MPI_Send(&(t13.contents[0][0]), ROWS*2*COLS, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-
-  //   // free temp tables
-  //   free(r1.contents);
-  //   free(t12.contents);
-  //   free(t13.contents);
-
-  // }
-  // else if (rank == 1) { //P2
-  //   MPI_Recv(&(t1.contents[0][0]), ROWS*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
-  // else { //P3
-  //   MPI_Recv(&(t1.contents[0][0]), ROWS*2*COLS, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -142,7 +94,7 @@ int main(int argc, char** argv) {
   }
   s[ROWS-1] = 0;  // Last row is never included in the result
   free(d); free(rem_d);
-  
+
   exchange_bit_shares_array(s, rs, ROWS);
 
   for (int i=0; i<ROWS-1; i++) {
@@ -179,7 +131,7 @@ int main(int argc, char** argv) {
   adjacent_geq(&t1, 2, 4, geq1, t1.numRows-1, 1);
 
   exchange_bit_shares_array(geq1, rem_geq1, ROWS);
-  
+
   // Evaluate geq1_i AND s_i
   for (int i=0; i<ROWS-1; i++) {
     // Evaluate geq2_i AND s_i
@@ -262,6 +214,6 @@ int main(int argc, char** argv) {
   free(t1.contents);
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }

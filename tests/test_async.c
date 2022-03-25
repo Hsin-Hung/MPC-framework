@@ -4,7 +4,6 @@
 #include "test-utils.h"
 
 #define DEBUG 0
-#define SHARE_TAG 193
 #define ROWS1 5
 #define COLS1 2
 #define ROWS2 4
@@ -50,9 +49,9 @@ int main(int argc, char **argv)
                 generate_bool_share(r2[i][j], &r2s1[i][j], &r2s2[i][j], &r2s3[i][j]);
             }
         }
- 
-        TCP_Send(r1s1[0][0], 1, get_pred(), SHARE_TAG);
-        TCP_Recv(r1s1[0][0], 1, get_succ(), SHARE_TAG);
+
+        TCP_Send(r1s1[0][0], 1, get_pred(), sizeof(BShare));
+        TCP_Recv(r1s1[0][0], 1, get_succ(), sizeof(BShare));
         printf("receive %lld", r1s1[0][0]);
     }
     else if (rank == 1)

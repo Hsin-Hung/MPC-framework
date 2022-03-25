@@ -5,8 +5,6 @@
 #include "exp-utils.h"
 
 #define DEBUG 0
-#define SHARE_TAG 193
-#define PRIVATE static
 #define COLS_L 5
 #define D1 1994
 #define D2 1996
@@ -25,7 +23,7 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  const long ROWS_L = atol(argv[1]);
+  const long ROWS_L = atol(argv[argc - 1]);
 
   // initialize communication
   init(argc, argv);
@@ -43,60 +41,60 @@ int main(int argc, char** argv) {
   // shares of constants (dates)
   AShare sd1, sd2, disc1, disc2, q;
 
-  // if (rank == 0) { //P1
-  //   // Initialize input data and shares
-  //   Table r_lineitem;
-  //   generate_random_table(&r_lineitem, ROWS_L, COLS_L);
+  if (rank == 0) { //P1
+    // Initialize input data and shares
+    Table r_lineitem;
+    generate_random_table(&r_lineitem, ROWS_L, COLS_L);
 
-  //   // t2 Bshare tables for P2, P3 (local to P1)
-  //   AShareTable t12 = {-1, 1, ROWS_L, 2*COLS_L, 2};
-  //   allocate_a_shares_table(&t12);
-  //   AShareTable t13 = {-1, 2, ROWS_L, 2*COLS_L, 2};
-  //   allocate_a_shares_table(&t13);
+    // t2 Bshare tables for P2, P3 (local to P1)
+    AShareTable t12 = {-1, 1, ROWS_L, 2*COLS_L, 2};
+    allocate_a_shares_table(&t12);
+    AShareTable t13 = {-1, 2, ROWS_L, 2*COLS_L, 2};
+    allocate_a_shares_table(&t13);
 
-  //   AShare d12, d22, d13, d23, disc12, disc22, disc13, disc23, q2, q3;
+    AShare d12, d22, d13, d23, disc12, disc22, disc13, disc23, q2, q3;
 
-  //   init_sharing();
+    init_sharing();
 
-  //   // Generate shares for r1
-  //   // NOTE: we use arithmetic sharing
-  //   generate_int_share_tables(&r_lineitem, &t1, &t12, &t13);
+    // Generate shares for r1
+    // NOTE: we use arithmetic sharing
+    generate_int_share_tables(&r_lineitem, &t1, &t12, &t13);
 
-  //   // generate shares for constants
-  //   generate_int_share(D1, &sd1, &d12, &d13);
-  //   generate_int_share(D2, &sd2, &d22, &d23);
-  //   generate_int_share(DISC_1, &disc1, &disc12, &disc13);
-  //   generate_int_share(DISC_2, &disc2, &disc22, &disc23);
-  //   generate_int_share(QUANT, &q, &q2, &q3);
+    // generate shares for constants
+    generate_int_share(D1, &sd1, &d12, &d13);
+    generate_int_share(D2, &sd2, &d22, &d23);
+    generate_int_share(DISC_1, &disc1, &disc12, &disc13);
+    generate_int_share(DISC_2, &disc2, &disc22, &disc23);
+    generate_int_share(QUANT, &q, &q2, &q3);
 
-  //   //Send shares to P2
-  //   MPI_Send(&(t12.contents[0][0]), ROWS_L*2*COLS_L, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&d12, 1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&d22, 1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&disc12, 1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&disc22, 1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&q2, 1, MPI_LONG_LONG, 1, SHARE_TAG, MPI_COMM_WORLD);
+    //Send shares to P2
+    TCP_Send(&(t12.contents[0][0]), ROWS_L*2*COLS_L, 1, sizeof(AShare));
+    TCP_Send(&d12, 1, 1, sizeof(AShare));
+    TCP_Send(&d22, 1, 1, sizeof(AShare));
+    TCP_Send(&disc12, 1, 1, sizeof(AShare));
+    TCP_Send(&disc22, 1, 1, sizeof(AShare));
+    TCP_Send(&q2, 1, 1, sizeof(AShare));
 
-  //   //Send shares to P3
-  //   MPI_Send(&(t13.contents[0][0]), ROWS_L*2*COLS_L, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&d13, 1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&d23, 1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&disc13, 1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&disc23, 1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
-  //   MPI_Send(&q3, 1, MPI_LONG_LONG, 2, SHARE_TAG, MPI_COMM_WORLD);
+    //Send shares to P3
+    TCP_Send(&(t13.contents[0][0]), ROWS_L*2*COLS_L, 2, sizeof(AShare));
+    TCP_Send(&d13, 1, 2, sizeof(AShare));
+    TCP_Send(&d23, 1, 2, sizeof(AShare));
+    TCP_Send(&disc13, 1, 2, sizeof(AShare));
+    TCP_Send(&disc23, 1, 2, sizeof(AShare));
+    TCP_Send(&q3, 1, 2, sizeof(AShare));
 
-  //   // free temp tables
-  //   free(t12.contents);
-  //   free(t13.contents);
-  // }
-  // else { //P2 or P3
-  //   MPI_Recv(&(t1.contents[0][0]), ROWS_L*2*COLS_L, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&sd1, 1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&sd2, 1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&disc1, 1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&disc2, 1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  //   MPI_Recv(&q, 1, MPI_LONG_LONG, 0, SHARE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  // }
+    // free temp tables
+    free(t12.contents);
+    free(t13.contents);
+  }
+  else { //P2 or P3
+    TCP_Recv(&(t1.contents[0][0]), ROWS_L*2*COLS_L, 0, sizeof(AShare));
+    TCP_Recv(&sd1, 1, 0, sizeof(AShare));
+    TCP_Recv(&sd2, 1, 0, sizeof(AShare));
+    TCP_Recv(&disc1, 1, 0, sizeof(AShare));
+    TCP_Recv(&disc2, 1, 0, sizeof(AShare));
+    TCP_Recv(&q, 1, 0, sizeof(AShare));
+  }
 
   //exchange seeds
   exchange_rsz_seeds(succ, pred);
@@ -180,7 +178,7 @@ int main(int argc, char** argv) {
      t1.contents[i][8], t1.contents[i][9], get_next_rb()) & 1;
   }
   exchange_bit_shares_array(sel, rem_sel, ROWS_L);
-  
+
   // Copy selection bits to columns 8, 9
   for (int i=0; i<ROWS_L; i++) {
     t1.contents[i][8] = (BShare)sel[i];
@@ -222,7 +220,7 @@ int main(int argc, char** argv) {
      t1.contents[i][8], t1.contents[i][9], get_next_rb()) & 1;
   }
   exchange_bit_shares_array(sel, rem_sel, ROWS_L);
-  
+
   // Copy selection bits to columns 8, 9
   for (int i=0; i<ROWS_L; i++) {
     t1.contents[i][8] = (BShare)sel[i];
@@ -241,7 +239,7 @@ int main(int argc, char** argv) {
   AShare rem_disc2 = exchange_shares(disc2);
   BShare disc2_b, rem_disc2_b;
   convert_a_to_b_array(&disc2, &rem_disc2, &disc2_b, &rem_disc2_b, 1);
-  
+
   geq_batch_const(lrec, rem_lrec, disc2_b, rem_disc2_b, ROWS_L, sel);
   // compute not selected
   for (int i=0; i<ROWS_L; i++) {
@@ -256,7 +254,7 @@ int main(int argc, char** argv) {
   }
 
   exchange_bit_shares_array(sel, rem_sel, ROWS_L);
-  
+
   // Copy selection bits to columns 8, 9
   for (int i=0; i<ROWS_L; i++) {
     t1.contents[i][8] = (BShare)sel[i];
@@ -368,6 +366,6 @@ int main(int argc, char** argv) {
   free(t1.contents);
 
   // tear down communication
-  // MPI_Finalize();
+  TCP_Finalize();
   return 0;
 }
