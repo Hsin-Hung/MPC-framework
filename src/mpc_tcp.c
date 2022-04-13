@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/poll.h>
+#include <netinet/tcp.h>
 #include "mpc_tcp.h"
 #include "comm.h"
 #include "config.h"
@@ -71,7 +72,7 @@ int TCP_Finalize(){
 int TCP_Connect(int dest)
 {
 
-    int sock = 0, valread;
+    int sock = 0, option = 1;
     struct sockaddr_in serv_addr;
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -89,9 +90,16 @@ int TCP_Connect(int dest)
         return -1;
     }
 
+    int result = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &option, sizeof(int));
+    if (result)
+    {
+	perror("Error setting TCP_NODELAY ");
+	return -1;
+    }
+
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
-        printf("\nConnection Failed \n");
+        perror("Connection Failed ");
         return -1;
     }
 
@@ -112,6 +120,14 @@ int TCP_Accept(int source)
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
+
+    int result = setsockopt(server_fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(int));
+    if (result)
+    {
+	perror("Error setting TCP_NODELAY ");
+	exit(EXIT_FAILURE);
+    }
+
 
     // Forcefully attaching socket to the port
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR,
