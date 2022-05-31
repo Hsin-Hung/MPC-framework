@@ -29,7 +29,7 @@ libsodium-1.0.18:
 		rm -f tar xf libsodium-1.0.18.tar.gz
 
 libsodium.a: libsodium-1.0.18
-		cd libsodium-1.0.18 && ./configure CFLAGS='-ggdb -O2 -mno-red-zone -mcmodel=kernel' \
+		cd libsodium-1.0.18 && ./configure CFLAGS='-ggdb -O2 -mno-red-zone -mcmodel=kernel -fno-pic' \
 			--enable-static --disable-shared
 		$(MAKE) -C libsodium-1.0.18 $(PARALLEL)
 		cp libsodium-1.0.18/src/libsodium/.libs/libsodium.a .
@@ -46,7 +46,7 @@ CRT_STARTS=$(CRT_LIB)crt1.o $(CRT_LIB)crti.o $(GCC_LIB)crtbeginT.o
 CRT_ENDS=$(GCC_LIB)crtend.o $(CRT_LIB)crtn.o
 SYS_LIBS=$(GCC_LIB)libgcc.a $(GCC_LIB)libgcc_eh.a
 
-secrecy.ukl:
+secrecy.ukl: libsodium.a
 	$(MAKE) -C src/ all
 	gcc -o exp_group_by.o -c $(CFLAGS) $(DEFINES) experiments/exp_group_by.c
 	ld -r -o secrecy.ukl --allow-multiple-definition $(CRT_STARTS) \
