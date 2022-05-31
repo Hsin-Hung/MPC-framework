@@ -1,6 +1,9 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <assert.h>
 #include <sys/time.h>
+#include <string.h>
 
 #include "exp-utils.h"
 
@@ -11,6 +14,32 @@
  **/
 
 int main(int argc, char** argv) {
+  FILE *fp;
+
+#ifdef UKL
+  char *args[9] = { NULL };
+  int i = 0;
+  ssize_t read = 0;
+  size_t n = 0;
+  char *nl;
+  argc = 8;
+  fp = fopen("/config", "r");
+
+  while((read = getline(&args[i], &n, fp)) > 0) {
+    nl = strchr(args[i], '\n');
+    if (nl)
+      *nl = 0;
+    i++;
+    n = 0;
+  }
+  fclose(fp);
+
+  // initialize communication
+  printf("Initializing comms\n");
+  init(argc, args);
+  const long ROWS = strtol(args[7], NULL, 10);
+
+#else
 
   if (argc < 2) {
     printf("\n\nUsage: %s <NUM_ROWS>\n\n", argv[0]);
@@ -18,9 +47,11 @@ int main(int argc, char** argv) {
   }
 
   // initialize communication
+  printf("Initializing comms\n");
   init(argc, argv);
-
   const long ROWS = atol(argv[argc - 1]); // input size
+
+#endif
 
   const int rank = get_rank();
   const int pred = get_pred();
@@ -29,6 +60,7 @@ int main(int argc, char** argv) {
   // The input tables per party
   BShareTable t1 = {-1, rank, ROWS, 2*COLS, 1};
   allocate_bool_shares_table(&t1);
+  printf("Starting\n");
 
   if (rank == 0) { //P1
     // Initialize input data and shares
@@ -41,16 +73,19 @@ int main(int argc, char** argv) {
     BShareTable t13 = {-1, 2, ROWS, 2*COLS, 1};
     allocate_bool_shares_table(&t13);
 
+printf("Sharing\n");
     init_sharing();
 
     // Generate boolean shares for r1
     generate_bool_share_tables(&r1, &t1, &t12, &t13);
 
+printf("Sending to 2\n");
     //Send shares to P2
-    TCP_Send(&(t12.contents[0][0]), ROWS*2*COLS, 1, sizeof(BShare));
+    TCP_Setup_Send(&(t12.contents[0][0]), ROWS*2*COLS, 1, sizeof(BShare));
 
+printf("Sending to 3\n");
     //Send shares to P3
-    TCP_Send(&(t13.contents[0][0]), ROWS*2*COLS, 2, sizeof(BShare));
+    TCP_Setup_Send(&(t13.contents[0][0]), ROWS*2*COLS, 2, sizeof(BShare));
 
     // free temp tables
     free(r1.contents);
@@ -58,10 +93,10 @@ int main(int argc, char** argv) {
     free(t13.contents);
   }
   else if (rank == 1) { //P2
-    TCP_Recv(&(t1.contents[0][0]), ROWS*2*COLS, 0, sizeof(BShare));
+    TCP_Setup_Recv(&(t1.contents[0][0]), ROWS*2*COLS, 0, sizeof(BShare));
   }
   else { //P3
-    TCP_Recv(&(t1.contents[0][0]), ROWS*2*COLS, 0, sizeof(BShare));
+    TCP_Setup_Recv(&(t1.contents[0][0]), ROWS*2*COLS, 0, sizeof(BShare));
   }
 
   //exchange seeds
@@ -106,7 +141,11 @@ int main(int argc, char** argv) {
   elapsed = seconds + micro*1e-6;
 
   if (rank == 0) {
+    fp = fopen("/output", "w");
+    fprintf(fp, "%ld\tGROUP-BY\t%.3f\n", ROWS, elapsed);
+    fclose(fp);
     printf("%ld\tGROUP-BY\t%.3f\n", ROWS, elapsed);
+
   }
 
   free(t1.contents); free(counters); free(remote_counters);
