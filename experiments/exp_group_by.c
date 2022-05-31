@@ -142,9 +142,9 @@ printf("Sending to 3\n");
 
   if (rank == 0) {
     fp = fopen("/output", "w");
-    fprintf(fp, "%ld\tGROUP-BY\t%.3f\n", ROWS, elapsed);
+    fprintf(fp, "%ld\tGROUP-BY\t%.6f\n", ROWS, elapsed);
     fclose(fp);
-    printf("%ld\tGROUP-BY\t%.3f\n", ROWS, elapsed);
+    printf("%ld\tGROUP-BY\t%.6f\n", ROWS, elapsed);
 
   }
 
