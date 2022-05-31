@@ -25,6 +25,12 @@ int TCP_Send(const void *buf, int count, int dest, int data_size);
 //  Performs a standard-mode blocking receive.
 int TCP_Recv(void *buf, int count, int source, int data_size);
 
+// Performs a standard-mode blocking send, in bypass this forces use of send syscall.
+int TCP_Setup_Send(const void *buf, int count, int dest, int data_size);
+
+//  Performs a standard-mode blocking receive, in bypass this forces use of recv syscall.
+int TCP_Setup_Recv(void *buf, int count, int source, int data_size);
+
 // close all socket
 int TCP_Finalize();
 

@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 600
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -15,7 +17,32 @@
 int succ_sock;
 int pred_sock;
 
+#ifdef UKL_BYPASS
+extern void set_bypass_limit(int val);
+extern void set_bypass_syscall(int val);
+#else
+#define set_bypass_limit(X) do {} while(0)
+#define set_bypass_syscall(X) do {} while(0)
+#endif
+
 extern struct secrecy_config config;
+
+#ifdef TCP_TRACE
+struct Record
+{
+	struct timespec start;
+	struct timespec end;
+	size_t size;
+};
+
+#define RECORDS 1000
+
+struct Record *sends;
+struct Record *receives;
+
+size_t send_count = 0;
+size_t receive_count = 0;
+#endif
 
 int get_socket(unsigned int party_rank)
 {
@@ -59,10 +86,69 @@ int TCP_Init()
         TCP_Connect(get_succ());
     }
 
+#ifdef TRACE_TCP
+    sends = malloc(sizeof(struct Record) * RECORDS);
+    receives = malloc(sizeof(struct Record) * RECORDS);
+
+    if (!sends || !receives)
+    {
+        exit(1);
+    }
+
+    memset(sends, 0, sizeof(struct Record) * RECORDS);
+    memset(receives, 0, sizeof(struct Record) * RECORDS);
+#endif
+
+    set_bypass_limit(10);
+
     return 0;
 }
 
+void calc_diff(struct timespec *diff, struct timespec *bigger, struct timespec *smaller)
+{
+        if (smaller->tv_nsec > bigger->tv_nsec)
+        {
+                diff->tv_nsec = 1000000000 + bigger->tv_nsec - smaller->tv_nsec;
+                diff->tv_sec = bigger->tv_sec - 1 - smaller->tv_sec;
+        }
+        else
+        {
+                diff->tv_nsec = bigger->tv_nsec - smaller->tv_nsec;
+                diff->tv_sec = bigger->tv_sec - smaller->tv_sec;
+        }
+}
+
 int TCP_Finalize(){
+#ifdef TRACE_TCP
+    int i;
+    struct timespec diff;
+    FILE *snds = fopen("/sends.csv", "w");
+    FILE *recvs = fopen("/receives.csv", "w");
+
+    printf("Saw %ld sends and %ld receives\n", send_count, receive_count);
+
+    fprintf(snds, "Time,Size\n");
+    fprintf(recvs, "Time,Size\n");
+    for (i = 0; i < send_count; i++)
+    {
+        calc_diff(&diff, &sends[i].end, &sends[i].start);
+        fprintf(snds, "%ld.%09ld,%ld\n", diff.tv_sec, diff.tv_nsec, sends[i].size);
+    }
+    for (i = 0; i < receive_count; i++)
+    {
+        calc_diff(&diff, &receives[i].end, &receives[i].start);
+        fprintf(recvs, "%ld.%09ld,%ld\n", diff.tv_sec, diff.tv_nsec, receives[i].size);
+    }
+
+    fflush(snds);
+    fflush(recvs);
+
+    free(sends);
+    free(receives);
+
+    fclose(snds);
+    fclose(recvs);
+#endif
 
     close(succ_sock);
     close(pred_sock);
@@ -93,8 +179,8 @@ int TCP_Connect(int dest)
     int result = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &option, sizeof(int));
     if (result)
     {
-	perror("Error setting TCP_NODELAY ");
-	return -1;
+        perror("Error setting TCP_NODELAY ");
+        return -1;
     }
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
@@ -104,6 +190,7 @@ int TCP_Connect(int dest)
     }
 
     succ_sock = sock;
+    return 0;
 }
 
 int TCP_Accept(int source)
@@ -124,8 +211,8 @@ int TCP_Accept(int source)
     int result = setsockopt(server_fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(int));
     if (result)
     {
-	perror("Error setting TCP_NODELAY ");
-	exit(EXIT_FAILURE);
+        perror("Error setting TCP_NODELAY ");
+        exit(EXIT_FAILURE);
     }
 
 
@@ -141,8 +228,7 @@ int TCP_Accept(int source)
     address.sin_port = htons(config.port);
 
     // Forcefully attaching socket to the port
-    if (bind(server_fd, (struct sockaddr *)&address,
-             sizeof(address)) < 0)
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
         perror("bind failed");
         exit(EXIT_FAILURE);
@@ -160,34 +246,198 @@ int TCP_Accept(int source)
     }
 
     pred_sock = new_socket;
+    return 0;
 }
+
+static int base_send(const void *buf, int count, int dest, int data_size)
+{
+    ssize_t n;
+    void *p = buf;
+
+    set_bypass_syscall(1);
+    count = count * data_size;
+    while (count > 0)
+    {
+#ifdef TRACE_TCP
+	    if (send_count < RECORDS)
+	    {
+            clock_gettime(CLOCK_MONOTONIC, &sends[send_count].start);
+	        sends[send_count].size = count;
+	    }
+#endif
+
+        n = send(get_socket(dest), p, count, 0);
+        if (n <= 0)
+        {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO)
+            {
+                // In these cases we really should try again
+                perror("Error returned from send, retrying");
+                continue;
+            }
+            else
+            {
+                set_bypass_syscall(0);
+                perror("Failed to send");
+                return -1;
+            }
+        }
+
+#ifdef TRACE_TCP
+	    if (send_count < RECORDS)
+	    {
+	        clock_gettime(CLOCK_MONOTONIC, &sends[send_count].end);
+	        send_count++;
+	    }
+#endif
+
+        p += n;
+        count -= n;
+    }
+
+    set_bypass_syscall(0);
+    return 0;
+}
+
+int TCP_Setup_Send(const void *buf, int count, int dest, int data_size)
+{
+    return base_send(buf, count, dest, data_size);
+}
+
+int bp_count = 0;
+
+#ifdef UKL_SHORTCUT
+extern int shortcut_tcp_sendmsg(int fd, struct iovec *iov);
+#endif
 
 int TCP_Send(const void *buf, int count, int dest, int data_size)
 {
-
+#ifdef UKL_SHORTCUT
     ssize_t n;
-    const void *p = buf;
+    void *p = buf;
+    struct iovec iov;
+
+    set_bypass_syscall(1);
     count = count * data_size;
     while (count > 0)
     {
-        n = send(get_socket(dest), p, count, 0);
+
+#ifdef TRACE_TCP
+	if (send_count < RECORDS)
+	{
+        clock_gettime(CLOCK_MONOTONIC, &sends[send_count].start);
+	    sends[send_count].size = count;
+	}
+#endif
+
+        iov.iov_base = (void *)p;
+        iov.iov_len  = count;
+        n = shortcut_tcp_sendmsg(get_socket(dest), &iov);
+
+#ifdef TRACE_TCP
+	if (send_count < RECORDS)
+	{
+	    clock_gettime(CLOCK_MONOTONIC, &sends[send_count].end);
+	    send_count++;
+	}
+#endif
+
         if (n <= 0)
             return -1;
         p += n;
         count -= n;
     }
 
+    return 0;
+#else
+    return base_send(buf, count, dest, data_size);
+#endif //UKL_SHORTCUT
+}
+
+static int base_recv(void *buf, int count, int source, int data_size)
+{
+    ssize_t n;
+    void *p = buf;
+
+    set_bypass_syscall(1);
+    count = count * data_size;
+    while (count > 0)
+    {
+#ifdef TRACE_TCP
+    if (receive_count < RECORDS)
+	{
+	    clock_gettime(CLOCK_MONOTONIC, &receives[receive_count].start);
+	    receives[receive_count].size = count;
+	}
+#endif
+        n = read(get_socket(source), p, count);
+        if (n <= 0)
+        {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO)
+            {
+                // In these cases we really should try again
+                perror("Error returned from read, retrying");
+                continue;
+            }
+            else
+            {
+                set_bypass_syscall(0);
+                perror("Failed to read");
+                return -1;
+            }
+        }
+#ifdef TRACE_TCP
+        if (receive_count < RECORDS)
+        {
+            clock_gettime(CLOCK_MONOTONIC, &receives[receive_count].end);
+            receive_count++;
+        }
+#endif
+        p += n;
+        count -= n;
+    }
+
+    set_bypass_syscall(0);
     return 0;
 }
 
+int TCP_Setup_Recv(void *buf, int count, int source, int data_size)
+{
+    return base_recv(buf, count, source, data_size);
+}
+
+#ifdef UKL_SHORTCUT
+extern int shortcut_tcp_recvmsg(int fd, struct iovec *iov);
+#endif
+
 int TCP_Recv(void *buf, int count, int source, int data_size)
 {
+#ifdef UKL_SHORTCUT
     ssize_t n;
-    const void *p = buf;
+    void *p = buf;
+    struct iovec iov;
+
     count = count * data_size;
     while (count > 0)
     {
-        n = read(get_socket(source), p, count);
+#ifdef TRACE_TCP
+	if (receive_count < RECORDS)
+	{
+	    clock_gettime(CLOCK_MONOTONIC, &receives[receive_count].start);
+	    receives[receive_count].size = count;
+	}
+#endif
+        iov.iov_base = (void *)p;
+        iov.iov_len  = count;
+        n = shortcut_tcp_recvmsg(get_socket(source), &iov);
+#ifdef TRACE_TCP
+	if (receive_count < RECORDS)
+	{
+	    clock_gettime(CLOCK_MONOTONIC, &receives[receive_count].end);
+	    receive_count++;
+	}
+#endif
+
         if (n <= 0)
             return -1;
         p += n;
@@ -195,4 +445,7 @@ int TCP_Recv(void *buf, int count, int source, int data_size)
     }
 
     return 0;
+#else
+    return base_recv(buf, count, source, data_size);
+#endif //UKL_SHORTCUT
 }
