@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-export CFLAGS = -std=c99 -g -O3 -Wall -I../src
+export CFLAGS = -std=c99 -ggdb -O3 -Wall -I../src -fno-omit-frame-pointer
 export LDFLAGS = -lsodium -lm
 export CC = gcc
 export AR = ar
