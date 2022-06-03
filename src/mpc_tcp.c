@@ -1,6 +1,7 @@
 #define _XOPEN_SOURCE 600
 #include <time.h>
 #include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -157,9 +158,10 @@ int TCP_Finalize(){
 
 int TCP_Connect(int dest)
 {
-
     int sock = 0, option = 1;
     struct sockaddr_in serv_addr;
+    int tries = 0;
+
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         printf("\n Socket creation error \n");
@@ -183,10 +185,20 @@ int TCP_Connect(int dest)
         return -1;
     }
 
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    while (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
-        perror("Connection Failed ");
-        return -1;
+        if (tries < 10 &&
+            (errno == ECONNREFUSED || errno == EINTR || errno == ETIMEDOUT))
+        {
+            // Try and exponential back-off to wait for the other side to come up
+            sleep((int)pow(2, tries));
+            tries++;
+        }
+        else
+        {
+            perror("Connection Failed ");
+            return -1;
+        }
     }
 
     succ_sock = sock;
@@ -214,7 +226,6 @@ int TCP_Accept(int source)
         perror("Error setting TCP_NODELAY ");
         exit(EXIT_FAILURE);
     }
-
 
     // Forcefully attaching socket to the port
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR,
