@@ -18,12 +18,16 @@
 int succ_sock;
 int pred_sock;
 
-#ifdef UKL_BYPASS
+#ifdef UKL
 extern void set_bypass_limit(int val);
 extern void set_bypass_syscall(int val);
 #else
 #define set_bypass_limit(X) do {} while(0)
 #define set_bypass_syscall(X) do {} while(0)
+#endif
+
+#ifndef MAX_CONN_TRIES
+#define MAX_CONN_TRIES 8
 #endif
 
 extern struct secrecy_config config;
@@ -187,10 +191,11 @@ int TCP_Connect(int dest)
 
     while (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
-        if (tries < 10 &&
-            (errno == ECONNREFUSED || errno == EINTR || errno == ETIMEDOUT))
+        if (tries < MAX_CONN_TRIES &&
+            (errno == ECONNREFUSED || errno == EINTR || errno == ETIMEDOUT || errno == ENETUNREACH))
         {
             // Try and exponential back-off to wait for the other side to come up
+            printf("Couldn't connect to peer, waiting %d seconds before trying again.\n", (int)pow(2, tries));
             sleep((int)pow(2, tries));
             tries++;
         }

@@ -22,9 +22,9 @@ int exchange_rsz_seeds(int succ_rank, int pred_rank) {
   randombytes_buf(&seed_local, sizeof(seed_local));
 
   // // send seed to successor
-  TCP_Send(&seed_local, 1, succ_rank, sizeof(Seed));
+  TCP_Setup_Send(&seed_local, 1, succ_rank, sizeof(Seed));
   // // receive remote seed
-  TCP_Recv(&seed_remote, 1, pred_rank, sizeof(Seed));
+  TCP_Setup_Recv(&seed_remote, 1, pred_rank, sizeof(Seed));
   // init generator states
   initstate(seed_local, local_state, RAND_STATE_SIZE);
   initstate(seed_remote, remote_state, RAND_STATE_SIZE);

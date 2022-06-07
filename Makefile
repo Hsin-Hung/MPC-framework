@@ -1,10 +1,10 @@
 .PHONY: all clean
 
-export DEFINES =
+export DEFINES = -DUKL_HEADLESS
 export CFLAGS = $(DEFINES) -std=c99 -ggdb -O3 -Wall -I../src -fno-omit-frame-pointer
 secrecy.ukl: CFLAGS = $(DEFINES) -std=c99 -ggdb -O3 -Wall -I../src -fno-omit-frame-pointer -mno-red-zone -mcmodel=kernel -fno-pic
-secrecy-bypass: DEFINES = -DUKL -DUKL_BYPASS
-secrecy-shortcut: DEFINES = -DUKL -DUKL_SHORTCUT
+secrecy-bypass: DEFINES = -DUKL -DUKL_HEADLESS -DUKL_BYPASS
+secrecy-shortcut: DEFINES = -DUKL -DUKL_HEADLESS -DUKL_SHORTCUT
 secrecy: DEFINES = -DUKL
 export LDFLAGS = -lsodium -lm
 export CC = gcc

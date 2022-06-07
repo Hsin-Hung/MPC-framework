@@ -16,7 +16,7 @@
 int main(int argc, char** argv) {
   FILE *fp;
 
-#ifdef UKL
+#ifdef UKL_HEADLESS
   char *args[9] = { NULL };
   int i = 0;
   ssize_t read = 0;
@@ -91,6 +91,7 @@ printf("Sending to 3\n");
     free(r1.contents);
     free(t12.contents);
     free(t13.contents);
+printf("Setup done\n");
   }
   else if (rank == 1) { //P2
     TCP_Setup_Recv(&(t1.contents[0][0]), ROWS*2*COLS, 0, sizeof(BShare));
