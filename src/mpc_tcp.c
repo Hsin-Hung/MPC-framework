@@ -121,7 +121,10 @@ int TCP_Init()
 #endif
 
 #ifdef URING_TCP
-	io_uring_queue_init(QUEUE, &ring, 0);
+	struct io_uring_params options;
+	options.flags = IORING_SETUP_SQPOLL;
+	options.sq_thread_idle = 10000;
+	io_uring_queue_init(QUEUE, &ring, IORING_SETUP_SQPOLL);
 #endif
 
     set_bypass_limit(10);
