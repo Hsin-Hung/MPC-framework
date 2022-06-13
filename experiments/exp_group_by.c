@@ -142,9 +142,11 @@ printf("Setup done\n");
   elapsed = seconds + micro*1e-6;
 
   if (rank == 0) {
+#ifdef UKL_HEADLESS
     fp = fopen("/output", "w");
     fprintf(fp, "%ld\tGROUP-BY\t%.6f\n", ROWS, elapsed);
     fclose(fp);
+#endif
     printf("%ld\tGROUP-BY\t%.6f\n", ROWS, elapsed);
 
   }
