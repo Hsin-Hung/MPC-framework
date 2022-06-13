@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sys/poll.h>
 #include <netinet/tcp.h>
+#include <liburing.h>
 #include "mpc_tcp.h"
 #include "comm.h"
 #include "config.h"
@@ -28,6 +29,21 @@ extern void set_bypass_syscall(int val);
 
 #ifndef MAX_CONN_TRIES
 #define MAX_CONN_TRIES 8
+#endif
+
+#ifdef URING_TCP
+#define QUEUE 					10
+#define EVENT_TYPE_READ         1
+#define EVENT_TYPE_WRITE        2
+
+struct io_uring ring;
+
+struct request {
+	int event_type;
+	int iovec_count;
+	int socket;
+	struct iovec iov[];
+};
 #endif
 
 extern struct secrecy_config config;
@@ -104,6 +120,10 @@ int TCP_Init()
     memset(receives, 0, sizeof(struct Record) * RECORDS);
 #endif
 
+#ifdef URING_TCP
+	io_uring_queue_init(QUEUE, &ring, 0);
+#endif
+
     set_bypass_limit(10);
 
     return 0;
@@ -144,6 +164,10 @@ int TCP_Finalize(){
         calc_diff(&diff, &receives[i].end, &receives[i].start);
         fprintf(recvs, "%ld.%09ld,%ld\n", diff.tv_sec, diff.tv_nsec, receives[i].size);
     }
+
+#ifdef URING_TCP
+	io_uring_queue_exit(ring)
+#endif
 
     fflush(snds);
     fflush(recvs);
@@ -326,6 +350,29 @@ int bp_count = 0;
 extern int shortcut_tcp_sendmsg(int fd, struct iovec *iov);
 #endif
 
+#ifdef URING_TCP
+void uring_send(int sock, void *data, int len)
+{
+	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+	struct io_uring_cqe *cqe;
+	struct request *req = malloc(sizeof(struct request) + sizeof(struct iovec));
+
+	req->event_type = EVENT_TYPE_WRITE;
+	req->socket = sock;
+	req->iovec_count = 1;
+	req->iov[0].iov_base = malloc(len);
+	req->iov[0].iov_len = len;
+	memcpy(req->iov[0].iov_base, data, len);
+
+	io_uring_prep_writev(sqe, req->socket, req->iov, req->iovec_count, 0);
+	io_uring_sqe_set_data(sqe, req);
+	io_uring_submit(&ring);
+
+	io_uring_wait_cqe(&ring, &cqe);
+	io_uring_cqe_seen(&ring, cqe);
+}
+#endif
+
 int TCP_Send(const void *buf, int count, int dest, int data_size)
 {
 #ifdef UKL_SHORTCUT
@@ -365,6 +412,9 @@ int TCP_Send(const void *buf, int count, int dest, int data_size)
     }
 
     return 0;
+#elif defined URING_TCP
+	uring_send(get_socket(dest), buf, data_size);
+	return 0;
 #else
     return base_send(buf, count, dest, data_size);
 #endif //UKL_SHORTCUT
@@ -426,6 +476,48 @@ int TCP_Setup_Recv(void *buf, int count, int source, int data_size)
 extern int shortcut_tcp_recvmsg(int fd, struct iovec *iov);
 #endif
 
+#ifdef URING_TCP
+void uring_recv(int sock, void  *buf, int len)
+{
+	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+	struct io_uring_cqe *cqe;
+	struct request *req = malloc(sizeof(struct request) + sizeof(struct iovec));
+	struct request *res;
+
+	req->iovec_count = 1;
+	req->iov[0].iov_base = malloc(len);
+	req->iov[0].iov_len = len;
+	req->event_type = EVENT_TYPE_READ;
+	req->socket = sock;
+	memset(req->iov[0].iov_base, 0, len);
+
+
+	io_uring_prep_readv(sqe, req->socket, &req->iov[0], req->iovec_count, 0);
+	io_uring_sqe_set_data(sqe, req);
+	io_uring_submit(&ring);
+
+	cqe = malloc(sizeof(struct io_uring_cqe) + sizeof(struct iovec));
+
+	if(io_uring_wait_cqe(&ring, &cqe) != 0)
+	{
+		perror("Recieve completion failed.\n");
+		exit(0);
+	}
+
+	if (cqe->res < 0) 
+	{
+		fprintf(stderr, "Async request failed: %s for event: %d\n",
+		strerror(-cqe->res), req->event_type);
+		exit(1);
+	}
+
+	res = (struct request *)io_uring_cqe_get_data(cqe);
+	memset(buf, (char *)res->iov[0].iov_base, len);
+
+	io_uring_cqe_seen(&ring, cqe);
+}
+#endif
+
 int TCP_Recv(void *buf, int count, int source, int data_size)
 {
 #ifdef UKL_SHORTCUT
@@ -461,6 +553,9 @@ int TCP_Recv(void *buf, int count, int source, int data_size)
     }
 
     return 0;
+#elif defined URING_TCP
+	uring_recv(get_socket(source), buf, data_size);
+	return 0;
 #else
     return base_recv(buf, count, source, data_size);
 #endif //UKL_SHORTCUT
