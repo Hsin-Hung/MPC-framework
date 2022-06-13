@@ -1,12 +1,13 @@
 .PHONY: all clean
 
-export DEFINES =
-export CFLAGS = $(DEFINES) -std=c99 -ggdb -O3 -Wall -I../src -fno-omit-frame-pointer
+export DEFINES = -DURING_TCP
+export CFLAGS = $(DEFINES) -std=c99 -ggdb -g -O3 -Wall -I../src -fno-omit-frame-pointer
 secrecy.ukl: CFLAGS = $(DEFINES) -std=c99 -ggdb -O3 -Wall -I../src -fno-omit-frame-pointer -mno-red-zone -mcmodel=kernel -fno-pic
-secrecy-bypass: DEFINES = -DUKL -DUKL_BYPASS
-secrecy-shortcut: DEFINES = -DUKL -DUKL_SHORTCUT
+secrecy-bypass: DEFINES = -DUKL -DUKL_HEADLESS -DUKL_BYPASS
+secrecy-shortcut: DEFINES = -DUKL -DUKL_HEADLESS -DUKL_SHORTCUT
+secrecy-user: DEFINES = -DUKL_HEADLESS 
 secrecy: DEFINES = -DUKL
-export LDFLAGS = -lsodium -lm
+export LDFLAGS = -lsodium -lm -luring
 export CC = gcc
 export AR = ar
 
@@ -61,5 +62,7 @@ secrecy.ukl: libsodium.a
 secrecy-bypass: secrecy.ukl
 
 secrecy-shortcut: secrecy.ukl
+
+secrecy-user: all
 
 secrecy: secrecy.ukl
