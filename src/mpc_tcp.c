@@ -219,7 +219,7 @@ int TCP_Connect(int dest)
     while (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
         if (tries < MAX_CONN_TRIES &&
-            (errno == ECONNREFUSED || errno == EINTR || errno == ETIMEDOUT || errno == ENETUNREACH))
+            (errno == ECONNREFUSED || errno == EINTR || errno == ETIMEDOUT || errno == ENETUNREACH || errno == EHOSTUNREACH))
         {
             // Try and exponential back-off to wait for the other side to come up
             printf("Couldn't connect to peer, waiting %d seconds before trying again.\n", (int)pow(2, tries));
