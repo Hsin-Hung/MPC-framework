@@ -36,7 +36,7 @@ libsodium.a: libsodium-1.0.18
 		cp libsodium-1.0.18/src/libsodium/.libs/libsodium.a .
 
 DIR := ${CURDIR}/..
-GCC_LIB=$(DIR)/gcc-build/x86_64-pc-linux-gnu/libgcc/
+GCC_LIB=$(DIR)/libgcc-build/x86_64-pc-linux-gnu/libgcc/
 LC_DIR=$(DIR)/glibc-build/
 CRT_LIB=$(LC_DIR)csu/
 C_LIB=$(LC_DIR)libc.a
