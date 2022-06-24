@@ -2,6 +2,8 @@
 *.d
 *.a
 cscope*
+libsodium-1.0.18
+secrecy.ukl
 experiments/exp-cmp-swap
 experiments/exp-distinct
 experiments/exp-equality
