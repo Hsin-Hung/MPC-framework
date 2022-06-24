@@ -24,7 +24,7 @@ clean:
 	$(MAKE) -C experiments/ clean
 	$(MAKE) -C examples/ clean
 
-lib: experiements/exp_group_by.c
+lib: experiments/exp_group_by.c
 	gcc -o exp_group_by.o -c $(CFLAGS) $(DEFINES) experiments/exp_group_by.c
 	$(MAKE) -C src/ all
 
