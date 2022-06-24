@@ -18,7 +18,7 @@ all:
 	$(MAKE) -C examples/ all
 
 clean:
-	-rm -f secrecy.ukl UKL.a
+	-rm -f secrecy.ukl UKL.a undefined_sys_hack.o
 	$(MAKE) -C src/ clean
 	$(MAKE) -C tests/ clean
 	$(MAKE) -C experiments/ clean
@@ -47,14 +47,17 @@ CRT_STARTS=$(CRT_LIB)crt1.o $(CRT_LIB)crti.o $(GCC_LIB)crtbeginT.o
 CRT_ENDS=$(GCC_LIB)crtend.o $(CRT_LIB)crtn.o
 SYS_LIBS=$(GCC_LIB)libgcc.a $(GCC_LIB)libgcc_eh.a
 
-secrecy.ukl: libsodium.a
+undefined_sys_hack.o: ../undefined_sys_hack.c
+	gcc -o $@ -c -ggdb -O2 -fno-omit-frame-pointer -mno-red-zone -mcmodel=kernel -fno-pic $^
+
+secrecy.ukl: libsodium.a undefined_sys_hack.o
 	$(MAKE) -C src/ all
 	gcc -o exp_group_by.o -c $(CFLAGS) $(DEFINES) experiments/exp_group_by.c
 	ld -r -o secrecy.ukl --allow-multiple-definition $(CRT_STARTS) \
 		exp_group_by.o --start-group --whole-archive src/libsecrecy.a libsodium.a \
 		$(RT_LIB) $(PTHREAD_LIB) $(MATH_LIB) $(C_LIB) --no-whole-archive \
 		$(SYS_LIBS) --end-group $(CRT_ENDS)
-	ar cr UKL.a secrecy.ukl ../undefined_sys_hack.o
+	ar cr UKL.a secrecy.ukl undefined_sys_hack.o
 	objcopy --prefix-symbols=ukl_ UKL.a
 	objcopy --redefine-syms=../redef_sym_names UKL.a
 	cp UKL.a ../
