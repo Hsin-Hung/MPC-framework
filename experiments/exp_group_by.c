@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
   FILE *fp;
 
 #ifdef UKL_HEADLESS
-  char *args[9] = { NULL };
+  char *args[6] = { NULL };
   int i = 0;
   ssize_t read = 0;
   size_t n = 0;
@@ -34,10 +34,13 @@ int main(int argc, char** argv) {
   }
   fclose(fp);
 
+  i--;
+
   // initialize communication
   printf("Initializing comms\n");
   init(argc, args);
-  const long ROWS = strtol(args[7], NULL, 10);
+  printf("Running with %s rows\n", args[i]);
+  const long ROWS = strtol(args[i], NULL, 10);
 
 #else
 

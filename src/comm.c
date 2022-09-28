@@ -1,4 +1,4 @@
-#include "comm.h"
+iinclude "comm.h"
 #include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,11 +20,10 @@ struct secrecy_config config;
 
 static void check_init(const char *f);
 
-const static char *opt_str = "r:c:p:i:h";
+const static char *opt_str = "r:p:i:h";
 
 const static struct option opts[] = {
     { "rank",    required_argument, NULL, 'r' },
-    { "count",   required_argument, NULL, 'c' },
     { "port",    required_argument, NULL, 'p' },
     { "ips",     required_argument, NULL, 'i' },
     { "help",    no_argument,       NULL, 'h' },
@@ -36,7 +35,6 @@ static void print_usage(const char *name)
     printf("Usage: %s <opts>\n", name);
     printf("<opts>:\n");
     printf("    -r|--rank     The rank of this node (from 0 to parties - 1)\n");
-    printf("    -c|--count    The count of parties participating\n");
     printf("    -p|--port     The to use for internode communication, defaults to 8000\n");
     printf("    -i|--ips      Comma delimited list of ip addresses in rank order\n");
     printf("    -h|--help     Print this message\n");
@@ -50,6 +48,7 @@ static int parse_opts(int argc, char **argv)
 
     // Set the port here, if the user specified a value this will be overwritten
     config.port = DEFAULT_PORT;
+    config.num_parties = NUM_PARTIES;
     int opt_index = 0;
     while (1)
     {
@@ -61,10 +60,6 @@ static int parse_opts(int argc, char **argv)
         {
         case 'r':
             config.rank = atoi(optarg);
-            break;
-
-        case 'c':
-            config.num_parties = atoi(optarg);
             break;
 
         case 'p':

@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-export DEFINES = -DURING_TCP
+#export DEFINES = -DURING_TCP
 export CFLAGS = $(DEFINES) -std=c99 -ggdb -g -O3 -Wall -I../src -fno-omit-frame-pointer
 lib : CFLAGS = $(DEFINES) -std=c99 -ggdb -O3 -Wall -I../src -fno-omit-frame-pointer -mno-red-zone -mcmodel=kernel -fno-pic -no-pie
 secrecy-bypass: DEFINES = -DUKL -DUKL_HEADLESS -DUKL_BYPASS
