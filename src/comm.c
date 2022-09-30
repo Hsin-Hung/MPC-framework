@@ -1,4 +1,4 @@
-iinclude "comm.h"
+#include "comm.h"
 #include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
